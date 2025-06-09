@@ -1,0 +1,32 @@
+import { STYLES } from "./styles";
+import { SCRIPT } from "./script";
+
+export function getWebviewContent(): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>My Todos</title>
+	<style>
+		${STYLES}
+	</style>
+</head>
+<body>
+	<div class="header">
+		<h3>My Todos</h3>
+		<button class="add-button" onclick="addTodo()">
+			<span>+</span> Add
+		</button>
+	</div>
+	
+	<ul class="todo-list" id="todoList">
+		<li class="no-todos">No todos yet. Click "Add" to create your first todo!</li>
+	</ul>
+
+	<script>
+		${SCRIPT}
+	</script>
+</body>
+</html>`;
+}

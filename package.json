@@ -12,12 +12,50 @@
   "activationEvents": [],
   "browser": "./dist/web/extension.js",
   "contributes": {
+    "views": {
+      "todoContainer": [
+        {
+          "id": "todoView",
+          "name": "My Todos",
+          "type": "webview"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "todoContainer",
+          "title": "My Todos",
+          "icon": "$(checklist)"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "my-todos.helloWorld",
-        "title": "Hello World"
+        "command": "my-todos.refreshTodos",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "my-todos.addTodo",
+        "title": "Add Todo",
+        "icon": "$(add)"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "my-todos.refreshTodos",
+          "when": "view == todoView",
+          "group": "navigation"
+        },
+        {
+          "command": "my-todos.addTodo",
+          "when": "view == todoView",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",

@@ -1,26 +1,34 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import { TodoViewProvider } from "./providers/TodoViewProvider";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  console.log("My Todos extension is now active!");
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "my-todos" is now active in the web extension host!');
+  const provider = new TodoViewProvider(context.extensionUri, context);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('my-todos.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      TodoViewProvider.viewType,
+      provider
+    )
+  );
 
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from my-todos in a web extension host!');
-	});
+  // Register commands
+  context.subscriptions.push(
+    vscode.commands.registerCommand("my-todos.refreshTodos", () => {
+      provider.refreshView();
+    })
+  );
 
-	context.subscriptions.push(disposable);
+  context.subscriptions.push(
+    vscode.commands.registerCommand("my-todos.addTodo", () => {
+      provider.addTodo();
+    })
+  );
 }
 
 // This method is called when your extension is deactivated

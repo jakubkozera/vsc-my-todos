@@ -1,0 +1,156 @@
+body {
+	font-family: var(--vscode-font-family);
+	font-size: var(--vscode-font-size);
+	color: var(--vscode-foreground);
+	background-color: var(--vscode-editor-background);
+	margin: 0;
+	padding: 16px;
+}
+
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.add-button {
+	background-color: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+	border: none;
+	padding: 6px 12px;
+	cursor: pointer;
+	border-radius: 2px;
+	font-size: 12px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.add-button:hover {
+	background-color: var(--vscode-button-hoverBackground);
+}
+
+.todo-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.todo-item {
+	border: 1px solid var(--vscode-input-border);
+	border-radius: 3px;
+	margin-bottom: 8px;
+	padding: 12px;
+	background-color: var(--vscode-input-background);
+	position: relative;
+}
+
+.todo-item.completed {
+	opacity: 0.6;
+}
+
+.todo-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 8px;
+}
+
+.todo-title {
+	background: transparent;
+	border: none;
+	color: var(--vscode-foreground);
+	font-size: 14px;
+	font-weight: 600;
+	width: 100%;
+	margin-right: 8px;
+	padding: 2px 4px;
+	border-radius: 2px;
+}
+
+.todo-title:focus {
+	outline: 1px solid var(--vscode-focusBorder);
+	background-color: var(--vscode-input-background);
+}
+
+.todo-title.empty::placeholder {
+	color: var(--vscode-input-placeholderForeground);
+	font-style: italic;
+}
+
+.todo-description {
+	background: transparent;
+	border: none;
+	color: var(--vscode-foreground);
+	font-size: 12px;
+	width: 100%;
+	margin-bottom: 8px;
+	padding: 2px 4px;
+	border-radius: 2px;
+	resize: vertical;
+	min-height: 20px;
+}
+
+.todo-description:focus {
+	outline: 1px solid var(--vscode-focusBorder);
+	background-color: var(--vscode-input-background);
+}
+
+.todo-description.empty::placeholder {
+	color: var(--vscode-input-placeholderForeground);
+	font-style: italic;
+}
+
+.todo-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 8px;
+}
+
+.todo-controls {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+.checkbox {
+	cursor: pointer;
+}
+
+.type-selector {
+	background-color: var(--vscode-dropdown-background);
+	color: var(--vscode-dropdown-foreground);
+	border: 1px solid var(--vscode-dropdown-border);
+	padding: 2px 6px;
+	font-size: 11px;
+	border-radius: 2px;
+	cursor: pointer;
+}
+
+.delete-button {
+	background: none;
+	border: none;
+	color: var(--vscode-errorForeground);
+	cursor: pointer;
+	padding: 2px;
+	font-size: 16px;
+	line-height: 1;
+}
+
+.delete-button:hover {
+	background-color: var(--vscode-toolbar-hoverBackground);
+	border-radius: 2px;
+}
+
+.no-todos {
+	text-align: center;
+	color: var(--vscode-descriptionForeground);
+	font-style: italic;
+	margin-top: 32px;
+}
+
+.completed-text {
+	text-decoration: line-through;
+}
