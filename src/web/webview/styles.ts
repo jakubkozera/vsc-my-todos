@@ -182,9 +182,9 @@ body {
 
 /* Filter button styles */
 .filter-button {
-	background-color: var(--vscode-button-background);
-	color: var(--vscode-button-foreground);
-	border: none;
+	background: transparent;
+	color: var(--vscode-foreground);
+	border: 1px solid var(--vscode-input-border);
 	padding: 8px;
 	cursor: pointer;
 	border-radius: 2px;
@@ -194,12 +194,20 @@ body {
 }
 
 .filter-button:hover {
-	background-color: var(--vscode-button-hoverBackground);
+	background-color: var(--vscode-list-hoverBackground);
+	border-color: var(--vscode-focusBorder);
 }
 
 .filter-button svg {
 	width: 16px;
 	height: 16px;
+	stroke: currentColor;
+}
+
+.add-button svg {
+	width: 16px;
+	height: 16px;
+	stroke: currentColor;
 }
 
 /* Filter popup styles */
