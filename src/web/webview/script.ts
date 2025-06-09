@@ -1,13 +1,19 @@
 export const SCRIPT = `
 const vscode = acquireVsCodeApi();
 let todos = [];
+let filteredTodos = [];
+let filters = {
+	text: '',
+	status: '',
+	type: ''
+};
 
 window.addEventListener('message', event => {
 	const message = event.data;
 	switch (message.type) {
 		case 'updateTodos':
 			todos = message.todos;
-			renderTodos();
+			applyFilters();
 			break;
 	}
 });
@@ -74,13 +80,62 @@ function onTypeChange(id, value) {
 	}
 }
 
+function toggleFilterPopup() {
+	const popup = document.getElementById('filterPopup');
+	popup.classList.toggle('active');
+}
+
+function applyFilters() {
+	const textFilter = document.getElementById('filterText').value.toLowerCase();
+	const statusFilter = document.getElementById('filterStatus').value;
+	const typeFilter = document.getElementById('filterType').value;
+	
+	filters.text = textFilter;
+	filters.status = statusFilter;
+	filters.type = typeFilter;
+	
+	filteredTodos = todos.filter(todo => {
+		// Text filter for title and description
+		const textMatch = !textFilter || 
+			(todo.title && todo.title.toLowerCase().includes(textFilter)) ||
+			(todo.description && todo.description.toLowerCase().includes(textFilter));
+		
+		// Status filter
+		const statusMatch = !statusFilter || todo.status === statusFilter;
+		
+		// Type filter
+		const typeMatch = !typeFilter || todo.type === typeFilter;
+		
+		return textMatch && statusMatch && typeMatch;
+	});
+	
+	renderTodos();
+}
+
+function clearFilters() {
+	document.getElementById('filterText').value = '';
+	document.getElementById('filterStatus').value = '';
+	document.getElementById('filterType').value = '';
+	
+	filters = { text: '', status: '', type: '' };
+	filteredTodos = todos;
+	renderTodos();
+}
+
 function renderTodos() {
 	const todoList = document.getElementById('todoList');
+	const todosToRender = filteredTodos.length > 0 || hasActiveFilters() ? filteredTodos : todos;
 	
-	if (todos.length === 0) {
-		todoList.innerHTML = '<li class="no-todos">No todos yet. Click "Add" to create your first todo!</li>';
+	if (todosToRender.length === 0) {
+		if (hasActiveFilters()) {
+			todoList.innerHTML = '<li class="no-todos">No todos match the current filters.</li>';
+		} else {
+			todoList.innerHTML = '<li class="no-todos">No todos yet. Click "Add" to create your first todo!</li>';
+		}
 		return;
-	}	todoList.innerHTML = todos.map(todo => \`
+	}
+
+	todoList.innerHTML = todosToRender.map(todo => \`
 		<li class="todo-item status-\${todo.status} \${todo.status === 'done' ? 'completed' : ''}">
 			<div class="todo-header">
 				<input 
@@ -101,7 +156,8 @@ function renderTodos() {
 				onchange="onDescriptionChange('\${todo.id}', this.value)"
 				\${todo.status === 'done' ? 'readonly' : ''}
 			>\${todo.description}</textarea>
-			<div class="todo-actions">				<div class="todo-controls">
+			<div class="todo-actions">
+				<div class="todo-controls">
 					<select 
 						class="status-selector" 
 						onchange="onStatusChange('\${todo.id}', this.value)"
@@ -111,7 +167,8 @@ function renderTodos() {
 						<option value="done" \${todo.status === 'done' ? 'selected' : ''}>Done</option>
 						<option value="blocked" \${todo.status === 'blocked' ? 'selected' : ''}>Blocked</option>
 					</select>
-				</div>				<select 
+				</div>
+				<select 
 					class="type-selector" 
 					onchange="onTypeChange('\${todo.id}', this.value)"
 					\${todo.status === 'done' ? 'disabled' : ''}
@@ -124,6 +181,22 @@ function renderTodos() {
 	\`).join('');
 }
 
+function hasActiveFilters() {
+	return filters.text !== '' || filters.status !== '' || filters.type !== '';
+}
+
+// Close popup when clicking outside
+document.addEventListener('click', function(event) {
+	const popup = document.getElementById('filterPopup');
+	const filterButton = document.querySelector('.filter-button');
+	
+	if (popup && popup.classList.contains('active') && 
+		!popup.querySelector('.filter-popup-content').contains(event.target) &&
+		!filterButton.contains(event.target)) {
+		popup.classList.remove('active');
+	}
+});
+
 // Initial render
-renderTodos();
+applyFilters();
 `;

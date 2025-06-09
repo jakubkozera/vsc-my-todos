@@ -179,4 +179,138 @@ body {
 .completed-text {
 	text-decoration: line-through;
 }
+
+/* Filter button styles */
+.filter-button {
+	background-color: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+	border: none;
+	padding: 8px;
+	cursor: pointer;
+	border-radius: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.filter-button:hover {
+	background-color: var(--vscode-button-hoverBackground);
+}
+
+.filter-button svg {
+	width: 16px;
+	height: 16px;
+}
+
+/* Filter popup styles */
+.filter-popup {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 1000;
+	align-items: center;
+	justify-content: center;
+}
+
+.filter-popup.active {
+	display: flex;
+}
+
+.filter-popup-content {
+	background-color: var(--vscode-editor-background);
+	border: 1px solid var(--vscode-input-border);
+	border-radius: 4px;
+	width: 300px;
+	max-width: 90vw;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.filter-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--vscode-input-border);
+}
+
+.filter-header h4 {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.close-button {
+	background: none;
+	border: none;
+	color: var(--vscode-foreground);
+	cursor: pointer;
+	padding: 4px;
+	font-size: 16px;
+	line-height: 1;
+	border-radius: 2px;
+}
+
+.close-button:hover {
+	background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+.filter-body {
+	padding: 16px;
+}
+
+.filter-group {
+	margin-bottom: 16px;
+}
+
+.filter-group:last-child {
+	margin-bottom: 0;
+}
+
+.filter-group label {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--vscode-foreground);
+}
+
+.filter-group input,
+.filter-group select {
+	width: 100%;
+	background-color: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border: 1px solid var(--vscode-input-border);
+	padding: 6px 8px;
+	font-size: 12px;
+	border-radius: 2px;
+	box-sizing: border-box;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+	outline: 1px solid var(--vscode-focusBorder);
+}
+
+.filter-actions {
+	margin-top: 16px;
+	text-align: right;
+}
+
+.clear-button {
+	background-color: var(--vscode-button-secondaryBackground);
+	color: var(--vscode-button-secondaryForeground);
+	border: none;
+	padding: 6px 12px;
+	cursor: pointer;
+	border-radius: 2px;
+	font-size: 12px;
+}
+
+.clear-button:hover {
+	background-color: var(--vscode-button-secondaryHoverBackground);
+}
 `;
