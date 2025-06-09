@@ -80,9 +80,8 @@ function renderTodos() {
 	if (todos.length === 0) {
 		todoList.innerHTML = '<li class="no-todos">No todos yet. Click "Add" to create your first todo!</li>';
 		return;
-	}
-	todoList.innerHTML = todos.map(todo => \`
-		<li class="todo-item \${todo.status === 'done' ? 'completed' : ''}">
+	}	todoList.innerHTML = todos.map(todo => \`
+		<li class="todo-item status-\${todo.status} \${todo.status === 'done' ? 'completed' : ''}">
 			<div class="todo-header">
 				<input 
 					type="text" 
@@ -102,27 +101,23 @@ function renderTodos() {
 				onchange="onDescriptionChange('\${todo.id}', this.value)"
 				\${todo.status === 'done' ? 'readonly' : ''}
 			>\${todo.description}</textarea>
-			<div class="todo-actions">
-				<div class="todo-controls">
+			<div class="todo-actions">				<div class="todo-controls">
 					<select 
 						class="status-selector" 
-						value="\${todo.status}" 
 						onchange="onStatusChange('\${todo.id}', this.value)"
 					>
-						<option value="todo">To do</option>
-						<option value="inprogress">In progress</option>
-						<option value="done">Done</option>
-						<option value="blocked">Blocked</option>
+						<option value="todo" \${todo.status === 'todo' ? 'selected' : ''}>To do</option>
+						<option value="inprogress" \${todo.status === 'inprogress' ? 'selected' : ''}>In progress</option>
+						<option value="done" \${todo.status === 'done' ? 'selected' : ''}>Done</option>
+						<option value="blocked" \${todo.status === 'blocked' ? 'selected' : ''}>Blocked</option>
 					</select>
-				</div>
-				<select 
+				</div>				<select 
 					class="type-selector" 
-					value="\${todo.type}" 
 					onchange="onTypeChange('\${todo.id}', this.value)"
 					\${todo.status === 'done' ? 'disabled' : ''}
 				>
-					<option value="workspace">Workspace</option>
-					<option value="global">Global</option>
+					<option value="workspace" \${todo.type === 'workspace' ? 'selected' : ''}>Workspace</option>
+					<option value="global" \${todo.type === 'global' ? 'selected' : ''}>Global</option>
 				</select>
 			</div>
 		</li>

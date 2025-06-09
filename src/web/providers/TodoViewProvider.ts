@@ -59,13 +59,12 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
     this.saveTodos();
     this.refreshView();
   }
-
   private updateTodo(updatedTodo: Todo) {
     const index = this.todos.findIndex((todo) => todo.id === updatedTodo.id);
     if (index !== -1) {
       this.todos[index] = updatedTodo;
       this.saveTodos();
-      this.updateBadge();
+      this.refreshView();
     }
   }
 
@@ -83,7 +82,6 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
       this.refreshView();
     }
   }
-
   private loadTodos() {
     // Load global todos
     const globalTodos = this._extensionContext.globalState.get<Todo[]>(
@@ -97,8 +95,49 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
       []
     );
 
-    this.todos = [...globalTodos, ...workspaceTodos];
+    // Migrate old todos from completed field to status field
+    const migratedGlobalTodos = globalTodos.map((todo) =>
+      this.migrateTodo(todo)
+    );
+    const migratedWorkspaceTodos = workspaceTodos.map((todo) =>
+      this.migrateTodo(todo)
+    );
+
+    this.todos = [...migratedGlobalTodos, ...migratedWorkspaceTodos];
+
+    // Save migrated todos back to storage
+    if (migratedGlobalTodos.length > 0 || migratedWorkspaceTodos.length > 0) {
+      this.saveTodos();
+    }
+
     this.updateBadge();
+  }
+
+  private migrateTodo(todo: any): Todo {
+    // If todo already has status field, return as is
+    if (todo.status) {
+      return todo as Todo;
+    }
+
+    // If todo has old completed field, migrate it
+    if (todo.hasOwnProperty("completed")) {
+      return {
+        id: todo.id,
+        title: todo.title || "",
+        description: todo.description || "",
+        type: todo.type || "workspace",
+        status: todo.completed ? "done" : "todo",
+      };
+    }
+
+    // Default case for any malformed todos
+    return {
+      id: todo.id || Date.now().toString(),
+      title: todo.title || "",
+      description: todo.description || "",
+      type: todo.type || "workspace",
+      status: "todo",
+    };
   }
 
   private saveTodos() {

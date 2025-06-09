@@ -45,6 +45,23 @@ body {
 	padding: 12px;
 	background-color: var(--vscode-input-background);
 	position: relative;
+	border-left: 2px solid var(--vscode-input-border);
+}
+
+.todo-item.status-todo {
+	border-left-color: #007acc; /* Blue for To do */
+}
+
+.todo-item.status-inprogress {
+	border-left-color: #ff8c00; /* Orange for In progress */
+}
+
+.todo-item.status-done {
+	border-left-color: #28a745; /* Green for Done */
+}
+
+.todo-item.status-blocked {
+	border-left-color: #dc3545; /* Red for Blocked */
 }
 
 .todo-item.completed {
