@@ -3,6 +3,8 @@
   "displayName": "My Todos - Real-time TODO Manager",
   "description": "Smart TODO management with real-time synchronization, CodeLens integration, and advanced filtering. Automatically detects and syncs TODO comments as you type!",
   "version": "1.2.0",
+  "publisher": "JakubKozera",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.100.0"
   },
