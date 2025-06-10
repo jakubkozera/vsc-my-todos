@@ -196,6 +196,7 @@ body {
 .type-icon-button svg {
 	width: 20px;
 	height: 20px;
+	stroke: var(--vscode-foreground);
 }
 
 .type-popup {
@@ -246,6 +247,7 @@ body {
 	width: 16px;
 	height: 16px;
 	flex-shrink: 0;
+	stroke: var(--vscode-foreground);
 }
 
 .status-popup {
@@ -694,5 +696,12 @@ body {
 
 .type-dropdown-option-text {
 	flex: 1;
+}
+
+.type-dropdown-option svg {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	stroke: var(--vscode-foreground);
 }
 `;
