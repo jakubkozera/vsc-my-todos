@@ -4,7 +4,7 @@ let todos = [];
 let filteredTodos = [];
 let filters = {
 	text: '',
-	status: '',
+	statuses: [], // Changed from status to statuses array
 	type: ''
 };
 
@@ -130,11 +130,9 @@ function toggleFilterPopup() {
 
 function applyFilters() {
 	const textFilter = document.getElementById('filterText').value.toLowerCase();
-	const statusFilter = document.getElementById('filterStatus').value;
 	const typeFilter = document.getElementById('filterType').value;
 	
 	filters.text = textFilter;
-	filters.status = statusFilter;
 	filters.type = typeFilter;
 	
 	filteredTodos = todos.filter(todo => {
@@ -143,8 +141,8 @@ function applyFilters() {
 			(todo.title && todo.title.toLowerCase().includes(textFilter)) ||
 			(todo.description && todo.description.toLowerCase().includes(textFilter));
 		
-		// Status filter
-		const statusMatch = !statusFilter || todo.status === statusFilter;
+		// Status filter - check if todo status is in selected statuses array
+		const statusMatch = filters.statuses.length === 0 || filters.statuses.includes(todo.status);
 		
 		// Type filter
 		const typeMatch = !typeFilter || todo.type === typeFilter;
@@ -155,12 +153,117 @@ function applyFilters() {
 	renderTodos();
 }
 
+function toggleStatusDropdown() {
+	const menu = document.getElementById('statusDropdownMenu');
+	menu.classList.toggle('active');
+}
+
+function toggleStatusSelection(statusValue) {
+	// Toggle the status in the filters array
+	const index = filters.statuses.indexOf(statusValue);
+	if (index > -1) {
+		filters.statuses.splice(index, 1);
+	} else {
+		filters.statuses.push(statusValue);
+	}
+	
+	// Update visual selection
+	updateStatusSelectionVisual();
+	
+	// Update the button text
+	updateStatusButtonText();
+	
+	// Apply filters
+	applyFilters();
+}
+
+function updateStatusSelectionVisual() {
+	// Update the visual state of all status options
+	const options = document.querySelectorAll('#statusDropdownMenu .status-dropdown-option[data-value]');
+	options.forEach(option => {
+		const value = option.getAttribute('data-value');
+		if (filters.statuses.includes(value)) {
+			option.classList.add('selected');
+		} else {
+			option.classList.remove('selected');
+		}
+	});
+}
+
+function updateStatusFilter() {
+	// This function is kept for compatibility but functionality moved to toggleStatusSelection
+	updateStatusButtonText();
+	applyFilters();
+}
+
+function updateStatusButtonText() {
+	const button = document.getElementById('statusDropdownButton');
+	const textSpan = button.querySelector('.status-dropdown-text');
+	
+	if (filters.statuses.length === 0) {
+		textSpan.textContent = 'All statuses';
+	} else if (filters.statuses.length === 1) {
+		// Show single status with icon
+		const status = filters.statuses[0];
+		const statusText = getStatusLabel(status);
+		textSpan.innerHTML = \`
+			<div style="display: flex; align-items: center; gap: 8px;">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<circle cx="12" cy="12" r="8" fill="\${getStatusColor(status)}" />
+				</svg>
+				<span>\${statusText}</span>
+			</div>
+		\`;
+	} else {
+		// Show count of selected statuses
+		textSpan.innerHTML = \`
+			<div style="display: flex; align-items: center; gap: 8px;">
+				<span>\${filters.statuses.length} statuses selected</span>
+			</div>
+		\`;
+	}
+}
+
+function clearAllStatuses() {
+	// Clear all selected statuses
+	filters.statuses = [];
+	
+	// Update visual selection
+	updateStatusSelectionVisual();
+	
+	// Update filter
+	updateStatusButtonText();
+	applyFilters();
+}
+
+function selectAllStatuses() {
+	// Select all status values
+	filters.statuses = ['todo', 'inprogress', 'done', 'blocked'];
+	
+	// Update visual selection
+	updateStatusSelectionVisual();
+	
+	// Update filter
+	updateStatusButtonText();
+	applyFilters();
+}
+
 function clearFilters() {
 	document.getElementById('filterText').value = '';
-	document.getElementById('filterStatus').value = '';
 	document.getElementById('filterType').value = '';
 	
-	filters = { text: '', status: '', type: '' };
+	// Clear all status selections
+	filters.statuses = [];
+	
+	// Reset filters
+	filters = { text: '', statuses: [], type: '' };
+	
+	// Update visual selection
+	updateStatusSelectionVisual();
+	
+	// Update status button text
+	updateStatusButtonText();
+	
 	filteredTodos = todos;
 	renderTodos();
 }
@@ -250,7 +353,7 @@ function renderTodos() {
 }
 
 function hasActiveFilters() {
-	return filters.text !== '' || filters.status !== '' || filters.type !== '';
+	return filters.text !== '' || filters.statuses.length > 0 || filters.type !== '';
 }
 
 // Close popup when clicking outside
@@ -271,6 +374,14 @@ document.addEventListener('click', function(event) {
 			statusPopup.classList.remove('active');
 		}
 	});
+		// Close status dropdown when clicking outside (but not when clicking on checkboxes or labels inside)
+	const statusDropdown = document.getElementById('statusDropdownMenu');
+	const statusDropdownButton = document.getElementById('statusDropdownButton');
+	if (statusDropdown && statusDropdown.classList.contains('active') &&
+		!statusDropdown.contains(event.target) && 
+		!statusDropdownButton.contains(event.target)) {
+		statusDropdown.classList.remove('active');
+	}
 });
 
 // Initial render

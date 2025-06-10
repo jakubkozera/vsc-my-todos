@@ -37,16 +37,45 @@ export function getWebviewContent(): string {
 				<div class="filter-group">
 					<label for="filterText">Search title/description:</label>
 					<input type="text" id="filterText" placeholder="Enter search text..." oninput="applyFilters()">
-				</div>
-				<div class="filter-group">
+				</div>				<div class="filter-group">
 					<label for="filterStatus">Status:</label>
-					<select id="filterStatus" onchange="applyFilters()">
-						<option value="">All statuses</option>
-						<option value="todo">To do</option>
-						<option value="inprogress">In progress</option>
-						<option value="done">Done</option>
-						<option value="blocked">Blocked</option>
-					</select>
+					<div class="custom-status-dropdown">
+						<button class="status-dropdown-button" onclick="toggleStatusDropdown()" id="statusDropdownButton">
+							<span class="status-dropdown-text">All statuses</span>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>						<div class="status-dropdown-menu" id="statusDropdownMenu">
+							<div class="status-dropdown-option" data-value="todo" onclick="toggleStatusSelection('todo')">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="12" cy="12" r="8" fill="#007acc" />
+								</svg>
+								<span>To do</span>
+							</div>
+							<div class="status-dropdown-option" data-value="inprogress" onclick="toggleStatusSelection('inprogress')">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="12" cy="12" r="8" fill="#ff8c00" />
+								</svg>
+								<span>In progress</span>
+							</div>
+							<div class="status-dropdown-option" data-value="done" onclick="toggleStatusSelection('done')">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="12" cy="12" r="8" fill="#28a745" />
+								</svg>
+								<span>Done</span>
+							</div>
+							<div class="status-dropdown-option" data-value="blocked" onclick="toggleStatusSelection('blocked')">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="12" cy="12" r="8" fill="#dc3545" />
+								</svg>
+								<span>Blocked</span>
+							</div>
+							<div class="status-dropdown-actions">
+								<button class="status-clear-all" onclick="clearAllStatuses()">Clear All</button>
+								<button class="status-select-all" onclick="selectAllStatuses()">Select All</button>
+							</div>
+						</div>
+					</div>
 				</div>
 				<div class="filter-group">
 					<label for="filterType">Type:</label>

@@ -410,4 +410,111 @@ body {
 .clear-button:hover {
 	background-color: var(--vscode-button-secondaryHoverBackground);
 }
+
+/* Custom status dropdown styles */
+.custom-status-dropdown {
+	position: relative;
+}
+
+.status-dropdown-button {
+	width: 100%;
+	background-color: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border: 1px solid var(--vscode-input-border);
+	padding: 6px 8px;
+	font-size: 12px;
+	border-radius: 2px;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	box-sizing: border-box;
+}
+
+.status-dropdown-button:focus {
+	outline: 1px solid var(--vscode-focusBorder);
+}
+
+.status-dropdown-button:hover {
+	background-color: var(--vscode-list-hoverBackground);
+}
+
+.status-dropdown-text {
+	flex: 1;
+	text-align: left;
+}
+
+.status-dropdown-menu {
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background-color: var(--vscode-dropdown-background);
+	border: 1px solid var(--vscode-dropdown-border);
+	border-radius: 2px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	z-index: 1001;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.status-dropdown-menu.active {
+	display: block;
+}
+
+.status-dropdown-option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	cursor: pointer;
+	font-size: 12px;
+	color: var(--vscode-dropdown-foreground);
+	border-radius: 2px;
+	margin: 2px 4px;
+	transition: background-color 0.2s ease;
+}
+
+.status-dropdown-option:hover {
+	background-color: var(--vscode-list-hoverBackground);
+}
+
+.status-dropdown-option.selected {
+	background-color: var(--vscode-list-activeSelectionBackground);
+	color: var(--vscode-list-activeSelectionForeground);
+}
+
+.status-dropdown-option.selected:hover {
+	background-color: var(--vscode-list-activeSelectionBackground);
+}
+
+.status-dropdown-actions {
+	border-top: 1px solid var(--vscode-input-border);
+	padding: 8px 12px;
+	display: flex;
+	gap: 8px;
+	justify-content: space-between;
+}
+
+.status-clear-all,
+.status-select-all {
+	background: none;
+	border: 1px solid var(--vscode-input-border);
+	color: var(--vscode-foreground);
+	padding: 4px 8px;
+	font-size: 11px;
+	border-radius: 2px;
+	cursor: pointer;
+	flex: 1;
+}
+
+.status-clear-all:hover,
+.status-select-all:hover {
+	background-color: var(--vscode-list-hoverBackground);
+}
+
+.status-dropdown-option-text {
+	flex: 1;
+}
 `;
