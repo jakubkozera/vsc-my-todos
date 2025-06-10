@@ -57,6 +57,10 @@ function getTypeIcon(type) {
 		return \`<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
 			<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"></path>
 		</svg>\`;
+	} else if (type === 'code') {
+		return \`<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5"></path>
+		</svg>\`;
 	} else {
 		return \`<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
 			<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"></path>
@@ -65,7 +69,12 @@ function getTypeIcon(type) {
 }
 
 function getTypeLabel(type) {
-	return type === 'workspace' ? 'Workspace' : 'Global';
+	switch (type) {
+		case 'workspace': return 'Workspace';
+		case 'code': return 'Code';
+		case 'global': return 'Global';
+		default: return 'Global';
+	}
 }
 
 function toggleTypePopup(todoId, event) {
@@ -144,7 +153,7 @@ function onStatusChange(id, value) {
 
 function onTitleChange(id, value) {
 	const todo = todos.find(t => t.id === id);
-	if (todo) {
+	if (todo && todo.type !== 'code') { // Don't allow editing code todo titles
 		todo.title = value;
 		updateTodo(id);
 	}
@@ -152,7 +161,7 @@ function onTitleChange(id, value) {
 
 function onDescriptionChange(id, value) {
 	const todo = todos.find(t => t.id === id);
-	if (todo) {
+	if (todo && todo.type !== 'code') { // Don't allow editing code todo descriptions
 		const wasEmpty = !todo.description;
 		todo.description = value;
 		updateTodo(id);
@@ -166,7 +175,7 @@ function onDescriptionChange(id, value) {
 
 function onTypeChange(id, value) {
 	const todo = todos.find(t => t.id === id);
-	if (todo) {
+	if (todo && todo.type !== 'code') { // Don't allow changing type of code todos
 		todo.type = value;
 		updateTodo(id);
 	}
@@ -593,7 +602,7 @@ function clearAllTypes() {
 
 function selectAllTypes() {
 	// Select all type values
-	filters.types = ['workspace', 'global'];
+	filters.types = ['workspace', 'global', 'code'];
 	
 	// Update visual selection
 	updateTypeSelectionVisual();
@@ -677,8 +686,7 @@ function renderTodos() {
 								Blocked
 							</button>
 						</div>
-					</div>
-					<input 
+					</div>					<input 
 						type="text" 
 						class="todo-title \${!todo.title ? 'empty' : ''}" 
 						value="\${todo.title}" 
@@ -686,16 +694,14 @@ function renderTodos() {
 						onchange="onTitleChange('\${todo.id}', this.value)"
 						onfocus="handleTitleFocus('\${todo.id}')"
 						onblur="handleTitleBlur('\${todo.id}')"
-						\${todo.status === 'done' ? 'readonly' : ''}
-					/>
-					<button class="delete-button" onclick="deleteTodo('\${todo.id}')" title="Delete todo">
+						\${todo.status === 'done' || todo.type === 'code' ? 'readonly' : ''}
+					/>					\${todo.type !== 'code' ? \`<button class="delete-button" onclick="deleteTodo('\${todo.id}')" title="Delete todo">
 						×
-					</button>
-					<div style="position: relative;">
-						<button class="type-icon-button" onclick="toggleTypePopup('\${todo.id}', event)" title="Change type">
+					</button>\` : ''}<div style="position: relative;">
+						<button class="type-icon-button" onclick="\${todo.type === 'code' ? \`navigateToCodeTodo('\${todo.id}')\` : \`toggleTypePopup('\${todo.id}', event)\`}" title="\${todo.type === 'code' ? 'Navigate to code' : 'Change type'}">
 							\${getTypeIcon(todo.type)}
 						</button>
-						<div class="type-popup" id="typePopup-\${todo.id}">
+						\${todo.type !== 'code' ? \`<div class="type-popup" id="typePopup-\${todo.id}">
 							<button class="type-option" onclick="selectType('\${todo.id}', 'workspace', event)">
 								<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
 									<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"></path>
@@ -708,14 +714,13 @@ function renderTodos() {
 								</svg>
 								Global
 							</button>
-						</div>
+						</div>\` : ''}
 					</div>
-				</div>			</div>
-			\${todo.description ? \`<textarea 
+				</div>			</div>			\${todo.description ? \`<textarea 
 				class="todo-description" 
 				placeholder="Description"
 				onchange="onDescriptionChange('\${todo.id}', this.value)"
-				\${todo.status === 'done' ? 'readonly' : ''}
+				\${todo.status === 'done' || todo.type === 'code' ? 'readonly' : ''}
 			>\${todo.description}</textarea>\` : ''}
 			<div class="todo-description-placeholder" id="description-placeholder-\${todo.id}"></div>
 		</li>
@@ -728,7 +733,7 @@ function hasActiveFilters() {
 
 function handleTitleFocus(todoId) {
 	const todo = todos.find(t => t.id === todoId);
-	if (!todo || todo.description) return; // Only handle empty descriptions
+	if (!todo || todo.description || todo.type === 'code') return; // Don't add description for code todos
 	
 	const placeholder = document.getElementById(\`description-placeholder-\${todoId}\`);
 	
@@ -748,7 +753,7 @@ function handleTitleFocus(todoId) {
 
 function handleTitleBlur(todoId) {
 	const todo = todos.find(t => t.id === todoId);
-	if (!todo || todo.description) return; // Only handle empty descriptions
+	if (!todo || todo.description || todo.type === 'code') return; // Don't handle code todos
 	
 	const placeholder = document.getElementById(\`description-placeholder-\${todoId}\`);
 	
@@ -844,4 +849,15 @@ applyFilters();
 // Initialize sort dropdown texts
 updateSortByButtonText();
 updateSortOrderButtonText();
+
+function navigateToCodeTodo(todoId) {
+	const todo = todos.find(t => t.id === todoId);
+	if (todo && todo.type === 'code' && todo.filePath && todo.lineNumber) {
+		vscode.postMessage({
+			type: 'navigateToCode',
+			filePath: todo.filePath,
+			lineNumber: todo.lineNumber
+		});
+	}
+}
 `;

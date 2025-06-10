@@ -29,6 +29,12 @@ export function activate(context: vscode.ExtensionContext) {
       provider.addTodo();
     })
   );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("my-todos.refreshCodeTodos", () => {
+      provider.scanCodeTodos();
+    })
+  );
 }
 
 // This method is called when your extension is deactivated
