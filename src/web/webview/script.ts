@@ -641,11 +641,9 @@ function renderTodos() {
 			todoList.innerHTML = '<li class="no-todos">No todos yet. Click "Add" to create your first todo!</li>';
 		}
 		return;
-	}todoList.innerHTML = todosToRender.map(todo => \`
+	}	todoList.innerHTML = todosToRender.map(todo => \`
 		<li class="todo-item status-\${todo.status} \${todo.status === 'done' ? 'completed' : ''} \${!todo.description ? 'has-empty-description' : ''}" 
-			data-todo-id="\${todo.id}"
-			onmouseenter="handleTodoMouseEnter('\${todo.id}')"
-			onmouseleave="handleTodoMouseLeave('\${todo.id}')">
+			data-todo-id="\${todo.id}">
 			<div class="todo-header">				<div class="todo-title-row">
 					<div style="position: relative;">
 						<button class="status-icon-button" onclick="toggleStatusPopup('\${todo.id}', event)" title="Change status">
@@ -686,6 +684,8 @@ function renderTodos() {
 						value="\${todo.title}" 
 						placeholder="Title"
 						onchange="onTitleChange('\${todo.id}', this.value)"
+						onfocus="handleTitleFocus('\${todo.id}')"
+						onblur="handleTitleBlur('\${todo.id}')"
 						\${todo.status === 'done' ? 'readonly' : ''}
 					/>
 					<button class="delete-button" onclick="deleteTodo('\${todo.id}')" title="Delete todo">
@@ -726,7 +726,7 @@ function hasActiveFilters() {
 	return filters.text !== '' || filters.statuses.length > 0 || filters.types.length > 0;
 }
 
-function handleTodoMouseEnter(todoId) {
+function handleTitleFocus(todoId) {
 	const todo = todos.find(t => t.id === todoId);
 	if (!todo || todo.description) return; // Only handle empty descriptions
 	
@@ -746,7 +746,7 @@ function handleTodoMouseEnter(todoId) {
 	}
 }
 
-function handleTodoMouseLeave(todoId) {
+function handleTitleBlur(todoId) {
 	const todo = todos.find(t => t.id === todoId);
 	if (!todo || todo.description) return; // Only handle empty descriptions
 	
@@ -755,10 +755,15 @@ function handleTodoMouseLeave(todoId) {
 	// Check if the textarea has content before removing
 	const textarea = placeholder?.querySelector('.todo-description');
 	if (textarea && !textarea.value.trim()) {
-		// Remove description textarea
-		if (placeholder) {
-			placeholder.innerHTML = '';
-		}
+		// Remove description textarea after a short delay to allow for focus changes
+		setTimeout(() => {
+			// Check again if textarea is still empty and not focused
+			if (textarea && !textarea.value.trim() && document.activeElement !== textarea) {
+				if (placeholder) {
+					placeholder.innerHTML = '';
+				}
+			}
+		}, 100);
 	}
 }
 
