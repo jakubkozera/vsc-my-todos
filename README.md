@@ -4,6 +4,8 @@ A powerful VS Code extension for managing TODO comments with real-time synchroni
 
 ## Features
 
+![My Todos demo](https://raw.githubusercontent.com/jakubkozera/vsc-my-todos/master/demo.gif)
+
 ### 📝 Real-time TODO Synchronization
 
 - **Live Updates**: TODO comments are automatically detected and synced to the todos view as you type
@@ -75,14 +77,6 @@ The extension automatically detects TODO comments in various formats:
 - `My Todos: Add Todo` - Add a new manual todo
 - `My Todos: Refresh Todos` - Refresh the todos view
 - `My Todos: Refresh Code TODOs` - Manually scan for code TODOs
-
-## Demo
-
-Try it out with the included test files:
-
-- `test-file.ts` - Contains various TODO comment examples
-- `test-codelens.ts` - Demonstrates CodeLens functionality
-- `test-realtime-todos.ts` - Perfect for testing real-time synchronization
 
 ## Requirements
 

@@ -18,6 +18,7 @@
     "test-codelens.ts",
     "test-realtime-sync.ts",
     "test-realtime-todos.ts",
+    "test-code-todos.ts",
     "src/web/**",
     "dist/**",
     "out/**",

@@ -214,7 +214,46 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
       workspaceTodos
     );
 
+    // Save code todo statuses separately to persist their status across refreshes
+    this.saveCodeTodoStatuses();
+
     this.updateBadge();
+  }
+
+  private saveCodeTodoStatuses() {
+    // Create a map of file:line -> status for code todos
+    const codeTodoStatuses: { [key: string]: string } = {};
+
+    this.todos
+      .filter(
+        (todo) => todo.type === "code" && todo.filePath && todo.lineNumber
+      )
+      .forEach((todo) => {
+        const key = `${todo.filePath}:${todo.lineNumber}`;
+        codeTodoStatuses[key] = todo.status;
+      });
+
+    this._extensionContext.workspaceState.update(
+      "codeTodoStatuses",
+      codeTodoStatuses
+    );
+  }
+  private loadCodeTodoStatuses(): { [key: string]: string } {
+    return this._extensionContext.workspaceState.get<{ [key: string]: string }>(
+      "codeTodoStatuses",
+      {}
+    );
+  }
+
+  private getValidTodoStatus(
+    status: string | undefined
+  ): "todo" | "inprogress" | "done" | "blocked" {
+    return status === "todo" ||
+      status === "inprogress" ||
+      status === "done" ||
+      status === "blocked"
+      ? status
+      : "todo";
   }
   private updateBadge() {
     const incompleteTodos = this.todos.filter(
@@ -294,8 +333,14 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
         "Running in web extension mode - using simplified file scanning"
       );
 
+      // Save current code todo statuses before removing them
+      this.saveCodeTodoStatuses();
+
       // Remove existing code todos
       this.todos = this.todos.filter((todo) => todo.type !== "code");
+
+      // Load saved statuses to restore them
+      const savedStatuses = this.loadCodeTodoStatuses();
 
       const todoRegex =
         /(\/\/|\/\*|\*|#|<!--)\s*(todo|to\s+do|to-do)\s*[:\-]?\s*(.*)/gi;
@@ -398,7 +443,10 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
                 for (const match of matches) {
                   const todoText = match[3]?.trim() || "TODO";
                   const fileName =
-                    file.fsPath.split(/[/\\]/).pop() || "unknown";
+                    file.fsPath.split(/[/\\]/).pop() || "unknown"; // Check if we have a saved status for this todo
+                  const statusKey = `${file.fsPath}:${i + 1}`;
+                  const savedStatus = savedStatuses[statusKey];
+                  const validStatus = this.getValidTodoStatus(savedStatus);
 
                   const codeTodo: Todo = {
                     id: `code-${Date.now()}-${Math.random()
@@ -407,7 +455,7 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
                     title: todoText || "TODO",
                     description: `${fileName}:${i + 1}`,
                     type: "code",
-                    status: "todo",
+                    status: validStatus,
                     filePath: file.fsPath,
                     lineNumber: i + 1,
                   };
@@ -559,6 +607,9 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
         (todo) => todo.type !== "code" || todo.filePath !== filePath
       );
 
+      // Load saved statuses to restore them
+      const savedStatuses = this.loadCodeTodoStatuses();
+
       const todoRegex =
         /(\/\/|\/\*|\*|#|<!--)\s*(todo|to\s+do|to-do)\s*[:\-]?\s*(.*)/gi;
 
@@ -589,6 +640,11 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
               todo.lineNumber === i + 1
           );
           if (!existingTodo) {
+            // Check if we have a saved status for this todo
+            const statusKey = `${filePath}:${i + 1}`;
+            const savedStatus = savedStatuses[statusKey];
+            const validStatus = this.getValidTodoStatus(savedStatus);
+
             // Create a new code todo
             const codeTodo: Todo = {
               id: `code-${Date.now()}-${Math.random()
@@ -597,7 +653,7 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
               title: todoText || "TODO",
               description: `${fileName}:${i + 1}`,
               type: "code",
-              status: "todo",
+              status: validStatus,
               filePath: filePath,
               lineNumber: i + 1,
             };
