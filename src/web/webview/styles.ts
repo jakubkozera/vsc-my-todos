@@ -5,7 +5,11 @@ body {
 	color: var(--vscode-foreground);
 	background-color: var(--vscode-editor-background);
 	margin: 0;
-	padding: 16px;
+	padding: 0;
+	height: 100vh;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
 }
 
 .header {
@@ -13,6 +17,10 @@ body {
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 16px;
+	padding: 16px;
+	flex-shrink: 0;
+	background-color: var(--vscode-editor-background);
+	border-bottom: 1px solid var(--vscode-input-border);
 }
 
 .add-button {
@@ -34,8 +42,11 @@ body {
 
 .todo-list {
 	list-style: none;
-	padding: 0;
+	padding: 16px;
 	margin: 0;
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
 
 .todo-item {
