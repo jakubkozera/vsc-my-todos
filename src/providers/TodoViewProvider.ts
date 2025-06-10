@@ -56,6 +56,9 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
         case "openExternalLink":
           vscode.env.openExternal(vscode.Uri.parse(data.url));
           break;
+        case "debugWorkspace":
+          this.debugWorkspaceState();
+          break;
       }
     }); // Listen for visibility changes to refresh todos when tab becomes visible
     webviewView.onDidChangeVisibility(() => {
@@ -65,7 +68,6 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
 
         // Always scan for code todos when view becomes visible (respecting scan mode settings)
         const scanMode = this.getScanMode();
-        debugger;
         if (scanMode !== "off") {
           // Scan for code todos when view becomes visible
           this.scanCodeTodos()
@@ -82,20 +84,24 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
         }
       }
     }); // Initialize webview with current todos first
-    this.refreshView(); // Then scan for code todos asynchronously and refresh again when done
-    this.scanCodeTodos()
-      .then(() => {
-        console.log("Code scanning completed successfully");
-        this.isInitialized = true;
-      })
-      .catch((error) => {
-        console.warn("Code scanning failed:", error);
-        this.isInitialized = true; // Mark as initialized anyway to prevent hanging
-        // Show a warning to the user but don't block the extension
-        vscode.window.showWarningMessage(
-          "TODO scanning completed with issues. Some code TODOs may not be shown."
-        );
-      });
+    this.refreshView();
+
+    // Then scan for code todos asynchronously with a longer delay to ensure workspace is ready
+    setTimeout(() => {
+      this.scanCodeTodos()
+        .then(() => {
+          console.log("Initial code scanning completed successfully");
+          this.isInitialized = true;
+        })
+        .catch((error) => {
+          console.warn("Initial code scanning failed:", error);
+          this.isInitialized = true; // Mark as initialized anyway to prevent hanging
+          // Show a warning to the user but don't block the extension
+          vscode.window.showWarningMessage(
+            "TODO scanning completed with issues. Some code TODOs may not be shown."
+          );
+        });
+    }, 500); // 500ms delay to ensure workspace is fully loaded
   }
   public addTodo() {
     const newTodo: Todo = {
@@ -320,17 +326,12 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
   }
   public async scanCodeTodos(): Promise<void> {
     try {
-      console.log("Starting scanCodeTodos... (Web Extension Mode)");
-
       if (!vscode.workspace.workspaceFolders) {
-        console.log("No workspace folders, returning early");
         return; // No workspace open
       }
 
-      // For web extensions, we need to be much more conservative
-      console.log(
-        "Running in web extension mode - using simplified file scanning"
-      );
+      // Add a small delay to ensure workspace is fully loaded
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Save current code todo statuses before removing them
       this.saveCodeTodoStatuses();
@@ -342,57 +343,89 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
       const savedStatuses = this.loadCodeTodoStatuses();
 
       const todoRegex =
-        /(\/\/|\/\*|\*|#|<!--)\s*(todo|to\s+do|to-do)\s*[:\-]?\s*(.*)/gi;
-
-      // In web extensions, limit to only a few workspace folders and use shorter timeouts
-      const maxWorkspaceFolders = 1; // Only scan first workspace folder
-      const workspaceFoldersToScan = vscode.workspace.workspaceFolders.slice(
-        0,
-        maxWorkspaceFolders
-      );
-
+        /(\/\/|\/\*|\*|#|<!--)\s*(todo|to\s+do|to-do)\s*[:\-]?\s*(.*)/gi; // Process all workspace folders
+      const workspaceFoldersToScan = vscode.workspace.workspaceFolders;
       for (const workspaceFolder of workspaceFoldersToScan) {
         try {
-          console.log(
-            `Scanning workspace folder: ${workspaceFolder.uri.fsPath}`
-          );
+          // Try different approaches based on the workspace type
+          let files: vscode.Uri[] = [];
 
-          // Skip gitignore loading in web extensions to avoid hanging
-          console.log(
-            "Skipping gitignore patterns for web extension compatibility"
-          ); // Use limited file patterns for web extensions
-          const files = await vscode.workspace.findFiles(
-            new vscode.RelativePattern(
-              workspaceFolder,
-              "**/*.{ts,js,tsx,jsx}" // Only scan common web files
-            ),
-            new vscode.RelativePattern(
-              workspaceFolder,
-              "{node_modules,dist,build,out,target,coverage,.git}/**"
-            )
-          );
-          debugger;
-
-          console.log(`Found ${files.length} files to scan`);
-
-          // Much more aggressive limits for web extensions
-          const maxFiles = 50; // Very limited for web extensions
-          const limitedFiles = files.slice(0, maxFiles);
-
-          if (files.length > maxFiles) {
-            console.warn(
-              `Limiting file scan to ${maxFiles} files (found ${files.length} total) - Web extension mode`
+          try {
+            // First attempt: try with RelativePattern
+            files = await vscode.workspace.findFiles(
+              new vscode.RelativePattern(
+                workspaceFolder,
+                "**/*.{ts,js,tsx,jsx,py,java,cs,cpp,c,php,rb,go,rs,swift,kt,vue,html,css,scss,less,json,md,yml,yaml,xml}" // Comprehensive file types
+              ),
+              new vscode.RelativePattern(
+                workspaceFolder,
+                "{node_modules,dist,build,out,target,coverage,.git,__pycache__,*.pyc,*.pyo,*.egg-info}/**"
+              )
             );
+          } catch (error) {
+            // Fallback approaches if RelativePattern fails
+          } // If no files found, try a simpler pattern
+          if (files.length === 0) {
+            try {
+              files = await vscode.workspace.findFiles(
+                "**/*.{ts,js,tsx,jsx,py,java,cs,cpp,c,php,rb,go,rs,swift,kt,vue,html,css,scss,less,json,md,yml,yaml,xml}",
+                "{node_modules,dist,build,out,target,coverage,.git,__pycache__,*.pyc,*.pyo,*.egg-info}/**"
+              );
+            } catch (error) {
+              // Fallback to basic pattern
+            }
+          } // If still no files, try very basic pattern
+          if (files.length === 0) {
+            try {
+              files = await vscode.workspace.findFiles("**/*");
+              // Filter manually for code files
+              files = files.filter((file) => {
+                const path = file.fsPath.toLowerCase();
+                return (
+                  (path.endsWith(".ts") ||
+                    path.endsWith(".js") ||
+                    path.endsWith(".tsx") ||
+                    path.endsWith(".jsx") ||
+                    path.endsWith(".py") ||
+                    path.endsWith(".java") ||
+                    path.endsWith(".cs") ||
+                    path.endsWith(".cpp") ||
+                    path.endsWith(".c") ||
+                    path.endsWith(".php") ||
+                    path.endsWith(".rb") ||
+                    path.endsWith(".go") ||
+                    path.endsWith(".rs") ||
+                    path.endsWith(".swift") ||
+                    path.endsWith(".kt") ||
+                    path.endsWith(".vue") ||
+                    path.endsWith(".html") ||
+                    path.endsWith(".css") ||
+                    path.endsWith(".scss") ||
+                    path.endsWith(".less") ||
+                    path.endsWith(".json") ||
+                    path.endsWith(".md") ||
+                    path.endsWith(".yml") ||
+                    path.endsWith(".yaml") ||
+                    path.endsWith(".xml")) &&
+                  !path.includes("node_modules") &&
+                  !path.includes("dist") &&
+                  !path.includes("build") &&
+                  !path.includes("out") &&
+                  !path.includes("target") &&
+                  !path.includes("coverage") &&
+                  !path.includes(".git") &&
+                  !path.includes("__pycache__") &&
+                  !path.endsWith(".pyc") &&
+                  !path.endsWith(".pyo")
+                );
+              });
+            } catch (error) {
+              // If all patterns fail, continue with empty file list
+            }
           }
 
-          console.log(`Processing ${limitedFiles.length} files`);
-
-          for (
-            let fileIndex = 0;
-            fileIndex < limitedFiles.length;
-            fileIndex++
-          ) {
-            const file = limitedFiles[fileIndex];
+          for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+            const file = files[fileIndex];
             try {
               // Yield occasionally for better performance
               if (fileIndex % 10 === 0) {
@@ -401,22 +434,14 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
 
               const document = await vscode.workspace.openTextDocument(file);
 
-              const text = document.getText();
-
-              // Much smaller file size limit for web extensions
-              if (text.length > 50000) {
-                // 50KB limit for web extensions
-                console.warn(
-                  `Skipping large file: ${file.fsPath} (${text.length} chars)`
-                );
+              const text = document.getText(); // Skip extremely large files to avoid performance issues
+              if (text.length > 500000) {
+                // 500KB limit - more reasonable for regular extensions
                 continue;
               }
 
-              const lines = text.split("\n");
-
-              // Limit line processing to prevent hanging
-              const maxLines = Math.min(lines.length, 1000);
-              for (let i = 0; i < maxLines; i++) {
+              const lines = text.split("\n"); // Process all lines in the file
+              for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
                 const matches = [...line.matchAll(todoRegex)];
                 for (const match of matches) {
@@ -443,24 +468,14 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
                 }
               }
             } catch (error) {
-              console.error(`Error scanning file ${file.fsPath}:`, error);
               // Continue with other files even if one fails
             }
           }
         } catch (error) {
-          console.error(
-            `Error scanning workspace folder ${workspaceFolder.uri.fsPath}:`,
-            error
-          );
           // Continue with other workspace folders even if one fails
         }
       }
 
-      console.log(
-        `Finished scanning, found ${
-          this.todos.filter((t) => t.type === "code").length
-        } code todos`
-      );
       this.refreshView();
     } catch (error) {
       console.error("Fatal error in scanCodeTodos:", error);
@@ -681,7 +696,6 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
       });
     }
   }
-
   // Method to check if scanning should be performed based on current settings
   public shouldScan(trigger: "change" | "save"): boolean {
     const scanMode = this.getScanMode();
@@ -696,5 +710,42 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
       default:
         return true; // Default to active scan for backward compatibility
     }
+  }
+
+  // Debug method to check workspace state
+  public async debugWorkspaceState(): Promise<void> {
+    console.log("=== Workspace Debug Info ===");
+    console.log(
+      `Workspace folders: ${vscode.workspace.workspaceFolders?.length || 0}`
+    );
+
+    if (vscode.workspace.workspaceFolders) {
+      for (const folder of vscode.workspace.workspaceFolders) {
+        console.log(`  - Name: ${folder.name}`);
+        console.log(`  - URI: ${folder.uri.toString()}`);
+        console.log(`  - Scheme: ${folder.uri.scheme}`);
+        console.log(`  - FSPath: ${folder.uri.fsPath}`);
+
+        try {
+          const files = await vscode.workspace.findFiles(
+            new vscode.RelativePattern(folder, "**/*"),
+            undefined,
+            10 // Just get first 10 files
+          );
+          console.log(`  - Sample files found: ${files.length}`);
+          files
+            .slice(0, 3)
+            .forEach((file) => console.log(`    - ${file.fsPath}`));
+        } catch (error) {
+          console.log(`  - Error reading files: ${error}`);
+        }
+      }
+    }
+
+    console.log(`Current todos count: ${this.todos.length}`);
+    console.log(
+      `Code todos: ${this.todos.filter((t) => t.type === "code").length}`
+    );
+    console.log("=== End Debug Info ===");
   }
 }
