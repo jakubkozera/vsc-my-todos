@@ -297,15 +297,15 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
             const matches = [...line.matchAll(todoRegex)];
             for (const match of matches) {
               const todoText = match[3]?.trim() || "TODO";
+              // Extract filename from full path
+              const fileName = file.fsPath.split(/[/\\]/).pop() || "unknown";
               // Create a new code todo
               const codeTodo: Todo = {
                 id: `code-${Date.now()}-${Math.random()
                   .toString(36)
                   .substr(2, 9)}`,
                 title: todoText || "TODO",
-                description: `File: ${vscode.workspace.asRelativePath(
-                  file
-                )}\nLine: ${i + 1}`,
+                description: `${fileName}:${i + 1}`,
                 type: "code",
                 status: "todo",
                 filePath: file.fsPath,
