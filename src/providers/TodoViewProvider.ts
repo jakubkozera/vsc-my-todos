@@ -53,6 +53,9 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
         case "updateScanMode":
           this.updateScanMode(data.scanMode);
           break;
+        case "openExternalLink":
+          vscode.env.openExternal(vscode.Uri.parse(data.url));
+          break;
       }
     }); // Listen for visibility changes to refresh todos when tab becomes visible
     webviewView.onDidChangeVisibility(() => {

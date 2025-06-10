@@ -23,6 +23,12 @@ body {
 	border-bottom: 1px solid var(--vscode-input-border);
 }
 
+.header-left-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
 .header-right-actions {
 	display: flex;
 	align-items: center;
@@ -44,6 +50,30 @@ body {
 
 .add-button:hover {
 	background-color: var(--vscode-button-hoverBackground);
+}
+
+/* GitHub button styles */
+.github-button {
+	background: transparent;
+	color: var(--vscode-foreground);
+	border: 1px solid var(--vscode-input-border);
+	padding: 8px;
+	cursor: pointer;
+	border-radius: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.github-button:hover {
+	background-color: var(--vscode-list-hoverBackground);
+	border-color: var(--vscode-focusBorder);
+}
+
+.github-button svg {
+	width: 16px;
+	height: 16px;
+	fill: currentColor;
 }
 
 /* Sort button styles */

@@ -910,4 +910,11 @@ function setScanMode(mode) {
 		radio.checked = radio.value === mode;
 	});
 }
+
+function openGitHubRepo() {
+	vscode.postMessage({
+		type: 'openExternalLink',
+		url: 'https://github.com/jakubkozera/vsc-my-todos'
+	});
+}
 `;
