@@ -48,6 +48,49 @@ function toggleComplete(id) {
 	});
 }
 
+function getStatusColor(status) {
+	switch (status) {
+		case 'todo': return '#007acc';
+		case 'inprogress': return '#ff8c00';
+		case 'done': return '#28a745';
+		case 'blocked': return '#dc3545';
+		default: return '#007acc';
+	}
+}
+
+function getStatusLabel(status) {
+	switch (status) {
+		case 'todo': return 'To do';
+		case 'inprogress': return 'In progress';
+		case 'done': return 'Done';
+		case 'blocked': return 'Blocked';
+		default: return 'To do';
+	}
+}
+
+function toggleStatusPopup(todoId, event) {
+	event.stopPropagation();
+	
+	// Close any other open popups
+	document.querySelectorAll('.status-popup.active').forEach(popup => {
+		if (popup.id !== \`statusPopup-\${todoId}\`) {
+			popup.classList.remove('active');
+		}
+	});
+	
+	const popup = document.getElementById(\`statusPopup-\${todoId}\`);
+	popup.classList.toggle('active');
+}
+
+function selectStatus(todoId, newStatus, event) {
+	event.stopPropagation();
+	onStatusChange(todoId, newStatus);
+	
+	// Close the popup
+	const popup = document.getElementById(\`statusPopup-\${todoId}\`);
+	popup.classList.remove('active');
+}
+
 function onStatusChange(id, value) {
 	const todo = todos.find(t => t.id === id);
 	if (todo) {
@@ -134,18 +177,52 @@ function renderTodos() {
 		}
 		return;
 	}
-
 	todoList.innerHTML = todosToRender.map(todo => \`
 		<li class="todo-item status-\${todo.status} \${todo.status === 'done' ? 'completed' : ''}">
 			<div class="todo-header">
-				<input 
-					type="text" 
-					class="todo-title \${!todo.title ? 'empty' : ''}" 
-					value="\${todo.title}" 
-					placeholder="Title"
-					onchange="onTitleChange('\${todo.id}', this.value)"
-					\${todo.status === 'done' ? 'readonly' : ''}
-				/>
+				<div class="todo-title-row">
+					<div style="position: relative;">
+						<button class="status-icon-button" onclick="toggleStatusPopup('\${todo.id}', event)" title="Change status">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<circle cx="12" cy="12" r="8" fill="\${getStatusColor(todo.status)}" />
+							</svg>
+						</button>
+						<div class="status-popup" id="statusPopup-\${todo.id}">
+							<button class="status-option" onclick="selectStatus('\${todo.id}', 'todo', event)">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="12" cy="12" r="8" fill="\${getStatusColor('todo')}" />
+								</svg>
+								To do
+							</button>
+							<button class="status-option" onclick="selectStatus('\${todo.id}', 'inprogress', event)">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="12" cy="12" r="8" fill="\${getStatusColor('inprogress')}" />
+								</svg>
+								In progress
+							</button>
+							<button class="status-option" onclick="selectStatus('\${todo.id}', 'done', event)">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="12" cy="12" r="8" fill="\${getStatusColor('done')}" />
+								</svg>
+								Done
+							</button>
+							<button class="status-option" onclick="selectStatus('\${todo.id}', 'blocked', event)">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="12" cy="12" r="8" fill="\${getStatusColor('blocked')}" />
+								</svg>
+								Blocked
+							</button>
+						</div>
+					</div>
+					<input 
+						type="text" 
+						class="todo-title \${!todo.title ? 'empty' : ''}" 
+						value="\${todo.title}" 
+						placeholder="Title"
+						onchange="onTitleChange('\${todo.id}', this.value)"
+						\${todo.status === 'done' ? 'readonly' : ''}
+					/>
+				</div>
 				<button class="delete-button" onclick="deleteTodo('\${todo.id}')" title="Delete todo">
 					×
 				</button>
@@ -158,15 +235,6 @@ function renderTodos() {
 			>\${todo.description}</textarea>
 			<div class="todo-actions">
 				<div class="todo-controls">
-					<select 
-						class="status-selector" 
-						onchange="onStatusChange('\${todo.id}', this.value)"
-					>
-						<option value="todo" \${todo.status === 'todo' ? 'selected' : ''}>To do</option>
-						<option value="inprogress" \${todo.status === 'inprogress' ? 'selected' : ''}>In progress</option>
-						<option value="done" \${todo.status === 'done' ? 'selected' : ''}>Done</option>
-						<option value="blocked" \${todo.status === 'blocked' ? 'selected' : ''}>Blocked</option>
-					</select>
 				</div>
 				<select 
 					class="type-selector" 
@@ -195,6 +263,14 @@ document.addEventListener('click', function(event) {
 		!filterButton.contains(event.target)) {
 		popup.classList.remove('active');
 	}
+	
+	// Close status popups when clicking outside
+	document.querySelectorAll('.status-popup.active').forEach(statusPopup => {
+		const statusButton = statusPopup.previousElementSibling;
+		if (!statusPopup.contains(event.target) && !statusButton.contains(event.target)) {
+			statusPopup.classList.remove('active');
+		}
+	});
 });
 
 // Initial render
