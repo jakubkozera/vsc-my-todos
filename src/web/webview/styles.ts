@@ -80,8 +80,9 @@ body {
 	height: 100%;
 	background-color: rgba(0, 0, 0, 0.5);
 	z-index: 1000;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: center;
+	padding-top: 60px; /* Position below header */
 }
 
 .sort-popup.active {
@@ -653,8 +654,9 @@ body {
 	height: 100%;
 	background-color: rgba(0, 0, 0, 0.5);
 	z-index: 1000;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: center;
+	padding-top: 60px; /* Position below header */
 }
 
 .filter-popup.active {
