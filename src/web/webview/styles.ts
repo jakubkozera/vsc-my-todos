@@ -23,6 +23,12 @@ body {
 	border-bottom: 1px solid var(--vscode-input-border);
 }
 
+.header-right-actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
 .add-button {
 	background-color: var(--vscode-button-background);
 	color: var(--vscode-button-foreground);
@@ -38,6 +44,116 @@ body {
 
 .add-button:hover {
 	background-color: var(--vscode-button-hoverBackground);
+}
+
+/* Sort button styles */
+.sort-button {
+	background: transparent;
+	color: var(--vscode-foreground);
+	border: 1px solid var(--vscode-input-border);
+	padding: 8px;
+	cursor: pointer;
+	border-radius: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.sort-button:hover {
+	background-color: var(--vscode-list-hoverBackground);
+	border-color: var(--vscode-focusBorder);
+}
+
+.sort-button svg {
+	width: 16px;
+	height: 16px;
+	stroke: currentColor;
+}
+
+/* Sort popup styles */
+.sort-popup {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 1000;
+	align-items: center;
+	justify-content: center;
+}
+
+.sort-popup.active {
+	display: flex;
+}
+
+.sort-popup-content {
+	background-color: var(--vscode-editor-background);
+	border: 1px solid var(--vscode-input-border);
+	border-radius: 4px;
+	width: 300px;
+	max-width: 90vw;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sort-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--vscode-input-border);
+}
+
+.sort-header h4 {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.sort-body {
+	padding: 16px;
+}
+
+.sort-group {
+	margin-bottom: 16px;
+}
+
+.sort-group:last-child {
+	margin-bottom: 0;
+}
+
+.sort-group label {
+	display: block;
+	margin-bottom: 8px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--vscode-foreground);
+}
+
+.sort-options {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.sort-option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: normal;
+	margin: 0;
+}
+
+.sort-option input[type="radio"] {
+	margin: 0;
+	width: auto;
+}
+
+.sort-option span {
+	color: var(--vscode-foreground);
 }
 
 .todo-list {

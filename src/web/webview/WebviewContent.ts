@@ -13,17 +13,24 @@ export function getWebviewContent(): string {
 	</style>
 </head>
 <body>	<div class="header">
-		<button class="filter-button" onclick="toggleFilterPopup()" title="Filter todos">
-			<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z"></path>
-			</svg>
-		</button>
 		<button class="add-button" onclick="addTodo()">
 			<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path>
 			</svg>
 			Add
 		</button>
+		<div class="header-right-actions">
+			<button class="sort-button" onclick="toggleSortPopup()" title="Sort todos">
+				<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18M3 12h18m-9 5h9"></path>
+				</svg>
+			</button>
+			<button class="filter-button" onclick="toggleFilterPopup()" title="Filter todos">
+				<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z"></path>
+				</svg>
+			</button>
+		</div>
 	</div>
 
 	<!-- Filter Popup -->
@@ -107,6 +114,47 @@ export function getWebviewContent(): string {
 				</div>
 				<div class="filter-actions">
 					<button class="clear-button" onclick="clearFilters()">Clear All</button>
+				</div>
+			</div>
+		</div>	</div>
+
+	<!-- Sort Popup -->
+	<div class="sort-popup" id="sortPopup">
+		<div class="sort-popup-content">
+			<div class="sort-header">
+				<h4>Sort Todos</h4>
+				<button class="close-button" onclick="toggleSortPopup()">×</button>
+			</div>
+			<div class="sort-body">
+				<div class="sort-group">
+					<label>Sort by:</label>
+					<div class="sort-options">
+						<label class="sort-option">
+							<input type="radio" name="sortBy" value="type" onchange="updateSort()" checked>
+							<span>Type</span>
+						</label>
+						<label class="sort-option">
+							<input type="radio" name="sortBy" value="status" onchange="updateSort()">
+							<span>Status</span>
+						</label>
+						<label class="sort-option">
+							<input type="radio" name="sortBy" value="created" onchange="updateSort()">
+							<span>Created Date</span>
+						</label>
+					</div>
+				</div>
+				<div class="sort-group">
+					<label>Sort order:</label>
+					<div class="sort-options">
+						<label class="sort-option">
+							<input type="radio" name="sortOrder" value="desc" onchange="updateSort()" checked>
+							<span>Descending</span>
+						</label>
+						<label class="sort-option">
+							<input type="radio" name="sortOrder" value="asc" onchange="updateSort()">
+							<span>Ascending</span>
+						</label>
+					</div>
 				</div>
 			</div>
 		</div>

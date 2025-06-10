@@ -7,6 +7,10 @@ let filters = {
 	statuses: [], // Changed from status to statuses array
 	types: [] // Changed from type to types array for multi-select
 };
+let sortSettings = {
+	sortBy: 'type', // Default sort by type
+	sortOrder: 'desc' // Default order descending
+};
 
 window.addEventListener('message', event => {
 	const message = event.data;
@@ -173,6 +177,79 @@ function toggleFilterPopup() {
 	popup.classList.toggle('active');
 }
 
+function toggleSortPopup() {
+	const popup = document.getElementById('sortPopup');
+	popup.classList.toggle('active');
+}
+
+function updateSort() {
+	const sortByElements = document.getElementsByName('sortBy');
+	const sortOrderElements = document.getElementsByName('sortOrder');
+	
+	// Get selected sort by value
+	for (let element of sortByElements) {
+		if (element.checked) {
+			sortSettings.sortBy = element.value;
+			break;
+		}
+	}
+	
+	// Get selected sort order value
+	for (let element of sortOrderElements) {
+		if (element.checked) {
+			sortSettings.sortOrder = element.value;
+			break;
+		}
+	}
+	
+	// Apply sorting
+	applyFilters();
+}
+
+function sortTodos(todosToSort) {
+	const sorted = [...todosToSort].sort((a, b) => {
+		let valueA, valueB;
+		
+		switch (sortSettings.sortBy) {
+			case 'type':
+				valueA = a.type;
+				valueB = b.type;
+				break;
+			case 'status':
+				// Define status order for sorting
+				const statusOrder = { 'todo': 0, 'inprogress': 1, 'blocked': 2, 'done': 3 };
+				valueA = statusOrder[a.status] ?? 0;
+				valueB = statusOrder[b.status] ?? 0;
+				break;
+			case 'created':
+				// Using todo.id as created date (timestamp)
+				valueA = parseInt(a.id);
+				valueB = parseInt(b.id);
+				break;
+			default:
+				return 0;
+		}
+		
+		// Compare values
+		let comparison = 0;
+		if (sortSettings.sortBy === 'created') {
+			// For timestamps, direct numerical comparison
+			comparison = valueA - valueB;
+		} else if (typeof valueA === 'string' && typeof valueB === 'string') {
+			// For strings, use localeCompare
+			comparison = valueA.localeCompare(valueB);
+		} else {
+			// For numbers
+			comparison = valueA - valueB;
+		}
+		
+		// Apply sort order
+		return sortSettings.sortOrder === 'desc' ? -comparison : comparison;
+	});
+	
+	return sorted;
+}
+
 function applyFilters() {
 	const textFilter = document.getElementById('filterText').value.toLowerCase();
 	
@@ -192,6 +269,9 @@ function applyFilters() {
 		
 		return textMatch && statusMatch && typeMatch;
 	});
+	
+	// Apply sorting to filtered todos
+	filteredTodos = sortTodos(filteredTodos);
 	
 	renderTodos();
 }
@@ -408,7 +488,12 @@ function clearFilters() {
 
 function renderTodos() {
 	const todoList = document.getElementById('todoList');
-	const todosToRender = filteredTodos.length > 0 || hasActiveFilters() ? filteredTodos : todos;
+	let todosToRender = filteredTodos.length > 0 || hasActiveFilters() ? filteredTodos : todos;
+	
+	// Apply sorting if no filters are active
+	if (!hasActiveFilters()) {
+		todosToRender = sortTodos(todos);
+	}
 	
 	if (todosToRender.length === 0) {
 		if (hasActiveFilters()) {
@@ -417,7 +502,7 @@ function renderTodos() {
 			todoList.innerHTML = '<li class="no-todos">No todos yet. Click "Add" to create your first todo!</li>';
 		}
 		return;
-	}	todoList.innerHTML = todosToRender.map(todo => \`
+	}todoList.innerHTML = todosToRender.map(todo => \`
 		<li class="todo-item status-\${todo.status} \${todo.status === 'done' ? 'completed' : ''} \${!todo.description ? 'has-empty-description' : ''}" 
 			data-todo-id="\${todo.id}"
 			onmouseenter="handleTodoMouseEnter('\${todo.id}')"
@@ -567,6 +652,16 @@ document.addEventListener('click', function(event) {
 		!popup.querySelector('.filter-popup-content').contains(event.target) &&
 		!filterButton.contains(event.target)) {
 		popup.classList.remove('active');
+	}
+	
+	// Close sort popup when clicking outside
+	const sortPopup = document.getElementById('sortPopup');
+	const sortButton = document.querySelector('.sort-button');
+	
+	if (sortPopup && sortPopup.classList.contains('active') && 
+		!sortPopup.querySelector('.sort-popup-content').contains(event.target) &&
+		!sortButton.contains(event.target)) {
+		sortPopup.classList.remove('active');
 	}
 		// Close status popups when clicking outside
 	document.querySelectorAll('.status-popup.active').forEach(statusPopup => {
