@@ -392,8 +392,7 @@ body {
 	border: none;
 	color: var(--vscode-foreground);
 	font-size: 12px;
-	width: 100%;
-	margin-bottom: 4px;
+	width: 100%; 
 	padding: 2px 4px;
 	border-radius: 2px;
 	resize: vertical;
