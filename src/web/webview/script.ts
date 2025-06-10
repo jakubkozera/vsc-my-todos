@@ -5,7 +5,7 @@ let filteredTodos = [];
 let filters = {
 	text: '',
 	statuses: [], // Changed from status to statuses array
-	type: ''
+	types: [] // Changed from type to types array for multi-select
 };
 
 window.addEventListener('message', event => {
@@ -48,14 +48,43 @@ function toggleComplete(id) {
 	});
 }
 
-function getStatusColor(status) {
-	switch (status) {
-		case 'todo': return '#007acc';
-		case 'inprogress': return '#ff8c00';
-		case 'done': return '#28a745';
-		case 'blocked': return '#dc3545';
-		default: return '#007acc';
+function getTypeIcon(type) {
+	if (type === 'workspace') {
+		return \`<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"></path>
+		</svg>\`;
+	} else {
+		return \`<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="20" height="20">
+			<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"></path>
+		</svg>\`;
 	}
+}
+
+function getTypeLabel(type) {
+	return type === 'workspace' ? 'Workspace' : 'Global';
+}
+
+function toggleTypePopup(todoId, event) {
+	event.stopPropagation();
+	
+	// Close any other open popups
+	document.querySelectorAll('.type-popup.active').forEach(popup => {
+		if (popup.id !== \`typePopup-\${todoId}\`) {
+			popup.classList.remove('active');
+		}
+	});
+	
+	const popup = document.getElementById(\`typePopup-\${todoId}\`);
+	popup.classList.toggle('active');
+}
+
+function selectType(todoId, newType, event) {
+	event.stopPropagation();
+	onTypeChange(todoId, newType);
+	
+	// Close the popup
+	const popup = document.getElementById(\`typePopup-\${todoId}\`);
+	popup.classList.remove('active');
 }
 
 function getStatusLabel(status) {
@@ -65,6 +94,16 @@ function getStatusLabel(status) {
 		case 'done': return 'Done';
 		case 'blocked': return 'Blocked';
 		default: return 'To do';
+	}
+}
+
+function getStatusColor(status) {
+	switch (status) {
+		case 'todo': return '#007acc';
+		case 'inprogress': return '#ff8c00';
+		case 'done': return '#28a745';
+		case 'blocked': return '#dc3545';
+		default: return '#007acc';
 	}
 }
 
@@ -130,10 +169,8 @@ function toggleFilterPopup() {
 
 function applyFilters() {
 	const textFilter = document.getElementById('filterText').value.toLowerCase();
-	const typeFilter = document.getElementById('filterType').value;
 	
 	filters.text = textFilter;
-	filters.type = typeFilter;
 	
 	filteredTodos = todos.filter(todo => {
 		// Text filter for title and description
@@ -144,8 +181,8 @@ function applyFilters() {
 		// Status filter - check if todo status is in selected statuses array
 		const statusMatch = filters.statuses.length === 0 || filters.statuses.includes(todo.status);
 		
-		// Type filter
-		const typeMatch = !typeFilter || todo.type === typeFilter;
+		// Type filter - check if todo type is in selected types array
+		const typeMatch = filters.types.length === 0 || filters.types.includes(todo.type);
 		
 		return textMatch && statusMatch && typeMatch;
 	});
@@ -248,21 +285,116 @@ function selectAllStatuses() {
 	applyFilters();
 }
 
+function toggleTypeDropdown() {
+	const menu = document.getElementById('typeDropdownMenu');
+	menu.classList.toggle('active');
+}
+
+function toggleTypeSelection(typeValue) {
+	// Toggle the type in the filters array
+	const index = filters.types.indexOf(typeValue);
+	if (index > -1) {
+		filters.types.splice(index, 1);
+	} else {
+		filters.types.push(typeValue);
+	}
+	
+	// Update visual selection
+	updateTypeSelectionVisual();
+	
+	// Update the button text
+	updateTypeButtonText();
+	
+	// Apply filters
+	applyFilters();
+}
+
+function updateTypeSelectionVisual() {
+	// Update the visual state of all type options
+	const options = document.querySelectorAll('#typeDropdownMenu .type-dropdown-option[data-value]');
+	options.forEach(option => {
+		const value = option.getAttribute('data-value');
+		if (filters.types.includes(value)) {
+			option.classList.add('selected');
+		} else {
+			option.classList.remove('selected');
+		}
+	});
+}
+
+function updateTypeFilter() {
+	// This function is kept for compatibility but functionality moved to toggleTypeSelection
+	updateTypeButtonText();
+	applyFilters();
+}
+
+function updateTypeButtonText() {
+	const button = document.getElementById('typeDropdownButton');
+	const textSpan = button.querySelector('.type-dropdown-text');
+	
+	if (filters.types.length === 0) {
+		textSpan.textContent = 'All types';
+	} else if (filters.types.length === 1) {
+		// Show single type with icon
+		const type = filters.types[0];
+		const typeText = getTypeLabel(type);
+		textSpan.innerHTML = \`
+			<div style="display: flex; align-items: center; gap: 8px;">
+				\${getTypeIcon(type)}
+				<span>\${typeText}</span>
+			</div>
+		\`;
+	} else {
+		// Show count of selected types
+		textSpan.innerHTML = \`
+			<div style="display: flex; align-items: center; gap: 8px;">
+				<span>\${filters.types.length} types selected</span>
+			</div>
+		\`;
+	}
+}
+
+function clearAllTypes() {
+	// Clear all selected types
+	filters.types = [];
+	
+	// Update visual selection
+	updateTypeSelectionVisual();
+	
+	// Update filter
+	updateTypeButtonText();
+	applyFilters();
+}
+
+function selectAllTypes() {
+	// Select all type values
+	filters.types = ['workspace', 'global'];
+	
+	// Update visual selection
+	updateTypeSelectionVisual();
+	
+	// Update filter
+	updateTypeButtonText();
+	applyFilters();
+}
+
 function clearFilters() {
 	document.getElementById('filterText').value = '';
-	document.getElementById('filterType').value = '';
 	
-	// Clear all status selections
+	// Clear all status and type selections
 	filters.statuses = [];
+	filters.types = [];
 	
 	// Reset filters
-	filters = { text: '', statuses: [], type: '' };
+	filters = { text: '', statuses: [], types: [] };
 	
 	// Update visual selection
 	updateStatusSelectionVisual();
+	updateTypeSelectionVisual();
 	
-	// Update status button text
+	// Update button texts
 	updateStatusButtonText();
+	updateTypeButtonText();
 	
 	filteredTodos = todos;
 	renderTodos();
@@ -282,8 +414,7 @@ function renderTodos() {
 	}
 	todoList.innerHTML = todosToRender.map(todo => \`
 		<li class="todo-item status-\${todo.status} \${todo.status === 'done' ? 'completed' : ''}">
-			<div class="todo-header">
-				<div class="todo-title-row">
+			<div class="todo-header">				<div class="todo-title-row">
 					<div style="position: relative;">
 						<button class="status-icon-button" onclick="toggleStatusPopup('\${todo.id}', event)" title="Change status">
 							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -317,6 +448,25 @@ function renderTodos() {
 							</button>
 						</div>
 					</div>
+					<div style="position: relative;">
+						<button class="type-icon-button" onclick="toggleTypePopup('\${todo.id}', event)" title="Change type">
+							\${getTypeIcon(todo.type)}
+						</button>
+						<div class="type-popup" id="typePopup-\${todo.id}">
+							<button class="type-option" onclick="selectType('\${todo.id}', 'workspace', event)">
+								<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776"></path>
+								</svg>
+								Workspace
+							</button>
+							<button class="type-option" onclick="selectType('\${todo.id}', 'global', event)">
+								<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"></path>
+								</svg>
+								Global
+							</button>
+						</div>
+					</div>
 					<input 
 						type="text" 
 						class="todo-title \${!todo.title ? 'empty' : ''}" 
@@ -335,25 +485,16 @@ function renderTodos() {
 				placeholder="Description"
 				onchange="onDescriptionChange('\${todo.id}', this.value)"
 				\${todo.status === 'done' ? 'readonly' : ''}
-			>\${todo.description}</textarea>
-			<div class="todo-actions">
+			>\${todo.description}</textarea>			<div class="todo-actions">
 				<div class="todo-controls">
 				</div>
-				<select 
-					class="type-selector" 
-					onchange="onTypeChange('\${todo.id}', this.value)"
-					\${todo.status === 'done' ? 'disabled' : ''}
-				>
-					<option value="workspace" \${todo.type === 'workspace' ? 'selected' : ''}>Workspace</option>
-					<option value="global" \${todo.type === 'global' ? 'selected' : ''}>Global</option>
-				</select>
 			</div>
 		</li>
 	\`).join('');
 }
 
 function hasActiveFilters() {
-	return filters.text !== '' || filters.statuses.length > 0 || filters.type !== '';
+	return filters.text !== '' || filters.statuses.length > 0 || filters.types.length > 0;
 }
 
 // Close popup when clicking outside
@@ -366,21 +507,37 @@ document.addEventListener('click', function(event) {
 		!filterButton.contains(event.target)) {
 		popup.classList.remove('active');
 	}
-	
-	// Close status popups when clicking outside
+		// Close status popups when clicking outside
 	document.querySelectorAll('.status-popup.active').forEach(statusPopup => {
 		const statusButton = statusPopup.previousElementSibling;
 		if (!statusPopup.contains(event.target) && !statusButton.contains(event.target)) {
 			statusPopup.classList.remove('active');
 		}
 	});
-		// Close status dropdown when clicking outside (but not when clicking on checkboxes or labels inside)
+	
+	// Close type popups when clicking outside
+	document.querySelectorAll('.type-popup.active').forEach(typePopup => {
+		const typeButton = typePopup.previousElementSibling;
+		if (!typePopup.contains(event.target) && !typeButton.contains(event.target)) {
+			typePopup.classList.remove('active');
+		}
+	});
+	// Close status dropdown when clicking outside (but not when clicking on checkboxes or labels inside)
 	const statusDropdown = document.getElementById('statusDropdownMenu');
 	const statusDropdownButton = document.getElementById('statusDropdownButton');
 	if (statusDropdown && statusDropdown.classList.contains('active') &&
 		!statusDropdown.contains(event.target) && 
 		!statusDropdownButton.contains(event.target)) {
 		statusDropdown.classList.remove('active');
+	}
+	
+	// Close type dropdown when clicking outside (but not when clicking on options inside)
+	const typeDropdown = document.getElementById('typeDropdownMenu');
+	const typeDropdownButton = document.getElementById('typeDropdownButton');
+	if (typeDropdown && typeDropdown.classList.contains('active') &&
+		!typeDropdown.contains(event.target) && 
+		!typeDropdownButton.contains(event.target)) {
+		typeDropdown.classList.remove('active');
 	}
 });
 
