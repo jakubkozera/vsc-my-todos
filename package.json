@@ -45,6 +45,10 @@
         "command": "my-todos.refreshCodeTodos",
         "title": "Refresh Code TODOs",
         "icon": "$(sync)"
+      },
+      {
+        "command": "myTodos.showTodosView",
+        "title": "Show Todos View"
       }
     ],
     "menus": {

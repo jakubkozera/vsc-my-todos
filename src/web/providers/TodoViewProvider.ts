@@ -6,14 +6,15 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "todoView";
   private _view?: vscode.WebviewView;
   private todos: Todo[] = [];
+  private onTodosChangedCallback?: (todos: Todo[]) => void;
+  private isInitialized = false;
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly _extensionContext: vscode.ExtensionContext
   ) {
     this.loadTodos();
-    this.scanCodeTodos(); // Scan for code todos on initialization
+    // Note: scanCodeTodos() will be called in resolveWebviewView to ensure proper timing
   }
-
   public resolveWebviewView(
     webviewView: vscode.WebviewView,
     context: vscode.WebviewViewResolveContext,
@@ -25,7 +26,6 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
       enableScripts: true,
       localResourceRoots: [this._extensionUri],
     };
-
     webviewView.webview.html = getWebviewContent();
     webviewView.webview.onDidReceiveMessage((data) => {
       switch (data.type) {
@@ -48,9 +48,26 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
           this.scanCodeTodos();
           break;
       }
+    }); // Listen for visibility changes to refresh todos when tab becomes visible
+    webviewView.onDidChangeVisibility(() => {
+      if (webviewView.visible) {
+        // Force refresh webview when it becomes visible
+        this.forceRefreshWebview();
+
+        // If code todos haven't been initialized yet, scan them
+        if (!this.isInitialized) {
+          this.scanCodeTodos();
+        }
+      }
     });
 
+    // Initialize webview with current todos first
     this.refreshView();
+
+    // Then scan for code todos asynchronously and refresh again when done
+    this.scanCodeTodos().then(() => {
+      this.isInitialized = true;
+    });
   }
   public addTodo() {
     const newTodo: Todo = {
@@ -189,15 +206,32 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
           : undefined;
     }
   }
-
   public refreshView() {
+    // Always update badge and notify CodeLens
+    this.updateBadge();
+
+    // Notify CodeLens provider of changes
+    if (this.onTodosChangedCallback) {
+      this.onTodosChangedCallback(this.todos);
+    }
+
+    // Only send message to webview if it's visible
+    if (this._view && this._view.visible) {
+      this._view.webview.postMessage({
+        type: "updateTodos",
+        todos: this.todos,
+      });
+    }
+  }
+
+  private forceRefreshWebview() {
+    // Force refresh webview regardless of visibility
     if (this._view) {
       this._view.webview.postMessage({
         type: "updateTodos",
         todos: this.todos,
       });
     }
-    this.updateBadge();
   }
 
   private async navigateToCode(filePath: string, lineNumber: number) {
@@ -227,7 +261,6 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
 
     const todoRegex =
       /(\/\/|\/\*|\*|#|<!--)\s*(todo|to\s+do|to-do)\s*[:\-]?\s*(.*)/gi;
-
     for (const workspaceFolder of vscode.workspace.workspaceFolders) {
       // Load gitignore patterns
       const gitignorePatterns = await this.loadGitignorePatterns(
@@ -376,5 +409,13 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
       console.warn(`Invalid gitignore pattern: ${pattern}`, error);
       return false;
     }
+  }
+
+  public getTodos(): Todo[] {
+    return this.todos;
+  }
+
+  public setOnTodosChangedCallback(callback: (todos: Todo[]) => void): void {
+    this.onTodosChangedCallback = callback;
   }
 }

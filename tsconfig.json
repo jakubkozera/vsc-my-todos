@@ -15,6 +15,7 @@
   "exclude": [
     "test-file.ts",
     "test-ignored-example.ts",
+    "test-codelens.ts",
     "dist/**",
     "out/**",
     "node_modules/**"
