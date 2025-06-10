@@ -242,9 +242,15 @@ body {
 	border: none;
 	color: var(--vscode-errorForeground);
 	cursor: pointer;
-	padding: 2px;
-	font-size: 16px;
+	padding: 4px;
+	font-size: 18px;
 	line-height: 1;
+	opacity: 0;
+	transition: opacity 0.1s ease;
+}
+
+.todo-item:hover .delete-button {
+	opacity: 1;
 }
 
 .delete-button:hover {
