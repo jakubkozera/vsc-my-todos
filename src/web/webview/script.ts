@@ -448,6 +448,14 @@ function renderTodos() {
 							</button>
 						</div>
 					</div>
+					<input 
+						type="text" 
+						class="todo-title \${!todo.title ? 'empty' : ''}" 
+						value="\${todo.title}" 
+						placeholder="Title"
+						onchange="onTitleChange('\${todo.id}', this.value)"
+						\${todo.status === 'done' ? 'readonly' : ''}
+					/>
 					<div style="position: relative;">
 						<button class="type-icon-button" onclick="toggleTypePopup('\${todo.id}', event)" title="Change type">
 							\${getTypeIcon(todo.type)}
@@ -467,14 +475,6 @@ function renderTodos() {
 							</button>
 						</div>
 					</div>
-					<input 
-						type="text" 
-						class="todo-title \${!todo.title ? 'empty' : ''}" 
-						value="\${todo.title}" 
-						placeholder="Title"
-						onchange="onTitleChange('\${todo.id}', this.value)"
-						\${todo.status === 'done' ? 'readonly' : ''}
-					/>
 				</div>
 				<button class="delete-button" onclick="deleteTodo('\${todo.id}')" title="Delete todo">
 					×

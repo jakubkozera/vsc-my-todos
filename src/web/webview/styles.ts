@@ -203,7 +203,7 @@ body {
 	display: none;
 	position: absolute;
 	top: 100%;
-	left: 0;
+	right: 0;
 	background-color: var(--vscode-editor-background);
 	border: 1px solid var(--vscode-input-border);
 	border-radius: 4px;
