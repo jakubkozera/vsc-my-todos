@@ -8,7 +8,7 @@ let filters = {
 	types: [] // Changed from type to types array for multi-select
 };
 let sortSettings = {
-	sortBy: 'type', // Default sort by type
+	sortBy: 'created', // Default sort by created date
 	sortOrder: 'desc' // Default order descending
 };
 
@@ -314,13 +314,13 @@ function updateSortOrderButtonText() {
 
 function resetSort() {
 	// Reset to default values
-	sortSettings.sortBy = 'type';
+	sortSettings.sortBy = 'created';
 	sortSettings.sortOrder = 'desc';
 	
 	// Update sort by dropdown selection
 	const sortByOptions = document.querySelectorAll('#sortByDropdownMenu .sort-by-dropdown-option');
 	sortByOptions.forEach(option => {
-		if (option.getAttribute('data-value') === 'type') {
+		if (option.getAttribute('data-value') === 'created') {
 			option.classList.add('selected');
 		} else {
 			option.classList.remove('selected');
@@ -710,8 +710,7 @@ function renderTodos() {
 							</button>
 						</div>
 					</div>
-				</div>
-			</div>
+				</div>			</div>
 			\${todo.description ? \`<textarea 
 				class="todo-description" 
 				placeholder="Description"
@@ -719,10 +718,6 @@ function renderTodos() {
 				\${todo.status === 'done' ? 'readonly' : ''}
 			>\${todo.description}</textarea>\` : ''}
 			<div class="todo-description-placeholder" id="description-placeholder-\${todo.id}"></div>
-			\${todo.description ? \`<div class="todo-actions">
-				<div class="todo-controls">
-				</div>
-			</div>\` : \`<div class="todo-actions-placeholder" id="actions-placeholder-\${todo.id}"></div>\`}
 		</li>
 	\`).join('');
 }
@@ -736,7 +731,6 @@ function handleTodoMouseEnter(todoId) {
 	if (!todo || todo.description) return; // Only handle empty descriptions
 	
 	const placeholder = document.getElementById(\`description-placeholder-\${todoId}\`);
-	const actionsPlaceholder = document.getElementById(\`actions-placeholder-\${todoId}\`);
 	
 	if (placeholder && !placeholder.querySelector('.todo-description')) {
 		// Create and insert description textarea
@@ -749,14 +743,6 @@ function handleTodoMouseEnter(todoId) {
 			textarea.setAttribute('readonly', '');
 		}
 		placeholder.appendChild(textarea);
-		
-		// Create and insert actions div
-		if (actionsPlaceholder && !actionsPlaceholder.querySelector('.todo-actions')) {
-			const actionsDiv = document.createElement('div');
-			actionsDiv.className = 'todo-actions';
-			actionsDiv.innerHTML = '<div class="todo-controls"></div>';
-			actionsPlaceholder.appendChild(actionsDiv);
-		}
 	}
 }
 
@@ -765,7 +751,6 @@ function handleTodoMouseLeave(todoId) {
 	if (!todo || todo.description) return; // Only handle empty descriptions
 	
 	const placeholder = document.getElementById(\`description-placeholder-\${todoId}\`);
-	const actionsPlaceholder = document.getElementById(\`actions-placeholder-\${todoId}\`);
 	
 	// Check if the textarea has content before removing
 	const textarea = placeholder?.querySelector('.todo-description');
@@ -773,11 +758,6 @@ function handleTodoMouseLeave(todoId) {
 		// Remove description textarea
 		if (placeholder) {
 			placeholder.innerHTML = '';
-		}
-		
-		// Remove actions div
-		if (actionsPlaceholder) {
-			actionsPlaceholder.innerHTML = '';
 		}
 	}
 }

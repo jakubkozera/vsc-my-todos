@@ -409,22 +409,8 @@ body {
 	font-style: italic;
 }
 
-.todo-description-placeholder,
-.todo-actions-placeholder {
-	/* Placeholders for dynamically inserted content */
-}
-
-.todo-actions {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-top: 4px;
-}
-
-.todo-controls {
-	display: flex;
-	gap: 6px;
-	align-items: center;
+.todo-description-placeholder {
+	/* Placeholder for dynamically inserted content */
 }
 
 .status-icon-button {
