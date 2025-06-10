@@ -47,6 +47,12 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
         case "refreshCodeTodos":
           this.scanCodeTodos();
           break;
+        case "getScanMode":
+          this.sendScanModeToWebview();
+          break;
+        case "updateScanMode":
+          this.updateScanMode(data.scanMode);
+          break;
       }
     }); // Listen for visibility changes to refresh todos when tab becomes visible
     webviewView.onDidChangeVisibility(() => {
@@ -417,5 +423,117 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
 
   public setOnTodosChangedCallback(callback: (todos: Todo[]) => void): void {
     this.onTodosChangedCallback = callback;
+  }
+
+  public async scanSingleDocument(document: vscode.TextDocument) {
+    if (!vscode.workspace.workspaceFolders) {
+      return; // No workspace open
+    }
+
+    // Check if the document is within any workspace folder
+    const isInWorkspace = vscode.workspace.workspaceFolders.some((folder) =>
+      document.uri.fsPath.startsWith(folder.uri.fsPath)
+    );
+
+    if (!isInWorkspace) {
+      return;
+    }
+
+    const filePath = document.uri.fsPath;
+
+    // Remove existing code todos for this specific file
+    this.todos = this.todos.filter(
+      (todo) => todo.type !== "code" || todo.filePath !== filePath
+    );
+
+    const todoRegex =
+      /(\/\/|\/\*|\*|#|<!--)\s*(todo|to\s+do|to-do)\s*[:\-]?\s*(.*)/gi;
+
+    const text = document.getText();
+    const lines = text.split("\n");
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const matches = [...line.matchAll(todoRegex)];
+
+      for (const match of matches) {
+        const todoText = match[3]?.trim() || "TODO";
+        // Extract filename from full path
+        const fileName = filePath.split(/[/\\]/).pop() || "unknown";
+
+        // Check if a todo with the same file and line already exists
+        const existingTodo = this.todos.find(
+          (todo) =>
+            todo.type === "code" &&
+            todo.filePath === filePath &&
+            todo.lineNumber === i + 1
+        );
+        if (!existingTodo) {
+          // Create a new code todo
+          const codeTodo: Todo = {
+            id: `code-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            title: todoText || "TODO",
+            description: `${fileName}:${i + 1}`,
+            type: "code",
+            status: "todo",
+            filePath: filePath,
+            lineNumber: i + 1,
+          };
+
+          this.todos.push(codeTodo);
+        } else {
+          // Update existing todo title if it changed, but preserve status
+          if (existingTodo.title !== todoText) {
+            existingTodo.title = todoText;
+          }
+          // Update description with current line number (in case line moved)
+          existingTodo.description = `${fileName}:${i + 1}`;
+          existingTodo.lineNumber = i + 1;
+        }
+      }
+    }
+    this.refreshView();
+  }
+
+  // Settings management methods
+  private getScanMode(): string {
+    const config = vscode.workspace.getConfiguration("my-todos");
+    return config.get("scanMode", "activeScan");
+  }
+
+  private async updateScanMode(scanMode: string): Promise<void> {
+    const config = vscode.workspace.getConfiguration("my-todos");
+    await config.update(
+      "scanMode",
+      scanMode,
+      vscode.ConfigurationTarget.Global
+    );
+    // Send confirmation back to webview
+    this.sendScanModeToWebview();
+  }
+
+  private sendScanModeToWebview(): void {
+    if (this._view) {
+      this._view.webview.postMessage({
+        type: "setScanMode",
+        scanMode: this.getScanMode(),
+      });
+    }
+  }
+
+  // Method to check if scanning should be performed based on current settings
+  public shouldScan(trigger: "change" | "save"): boolean {
+    const scanMode = this.getScanMode();
+
+    switch (scanMode) {
+      case "off":
+        return false;
+      case "onSave":
+        return trigger === "save";
+      case "activeScan":
+        return true;
+      default:
+        return true; // Default to active scan for backward compatibility
+    }
   }
 }

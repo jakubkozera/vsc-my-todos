@@ -19,6 +19,9 @@ window.addEventListener('message', event => {
 			todos = message.todos;
 			applyFilters();
 			break;
+		case 'setScanMode':
+			setScanMode(message.scanMode);
+			break;
 	}
 });
 
@@ -832,14 +835,23 @@ document.addEventListener('click', function(event) {
 		!sortByDropdownButton.contains(event.target)) {
 		sortByDropdown.classList.remove('active');
 	}
-	
-	// Close sort order dropdown when clicking outside
+		// Close sort order dropdown when clicking outside
 	const sortOrderDropdown = document.getElementById('sortOrderDropdownMenu');
 	const sortOrderDropdownButton = document.getElementById('sortOrderDropdownButton');
 	if (sortOrderDropdown && sortOrderDropdown.classList.contains('active') &&
 		!sortOrderDropdown.contains(event.target) && 
 		!sortOrderDropdownButton.contains(event.target)) {
 		sortOrderDropdown.classList.remove('active');
+	}
+	
+	// Close settings popup when clicking outside
+	const settingsPopup = document.getElementById('settingsPopup');
+	const settingsButton = document.querySelector('.settings-button');
+	
+	if (settingsPopup && settingsPopup.classList.contains('active') && 
+		!settingsPopup.querySelector('.settings-popup-content').contains(event.target) &&
+		!settingsButton.contains(event.target)) {
+		settingsPopup.classList.remove('active');
 	}
 });
 
@@ -850,6 +862,9 @@ applyFilters();
 updateSortByButtonText();
 updateSortOrderButtonText();
 
+// Initialize settings with current scan mode
+initializeSettings();
+
 function navigateToCodeTodo(todoId) {
 	const todo = todos.find(t => t.id === todoId);
 	if (todo && todo.type === 'code' && todo.filePath && todo.lineNumber) {
@@ -859,5 +874,40 @@ function navigateToCodeTodo(todoId) {
 			lineNumber: todo.lineNumber
 		});
 	}
+}
+
+// Settings functionality
+function toggleSettingsPopup() {
+	const popup = document.getElementById('settingsPopup');
+	popup.classList.toggle('active');
+}
+
+function initializeSettings() {
+	// Request current scan mode from extension
+	vscode.postMessage({
+		type: 'getScanMode'
+	});
+}
+
+function updateScanMode(mode) {
+	// Update the radio button selection
+	const radios = document.querySelectorAll('input[name="scanMode"]');
+	radios.forEach(radio => {
+		radio.checked = radio.value === mode;
+	});
+	
+	// Send the new setting to the extension
+	vscode.postMessage({
+		type: 'updateScanMode',
+		scanMode: mode
+	});
+}
+
+// Handle scan mode updates from extension
+function setScanMode(mode) {
+	const radios = document.querySelectorAll('input[name="scanMode"]');
+	radios.forEach(radio => {
+		radio.checked = radio.value === mode;
+	});
 }
 `;

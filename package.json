@@ -1,8 +1,8 @@
 {
   "name": "my-todos",
-  "displayName": "my-todos",
-  "description": "",
-  "version": "0.0.1",
+  "displayName": "My Todos - Real-time TODO Manager",
+  "description": "Smart TODO management with real-time synchronization, CodeLens integration, and advanced filtering. Automatically detects and syncs TODO comments as you type!",
+  "version": "1.2.0",
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -69,6 +69,27 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "My Todos",
+      "properties": {
+        "my-todos.scanMode": {
+          "type": "string",
+          "enum": [
+            "off",
+            "onSave",
+            "activeScan"
+          ],
+          "enumDescriptions": [
+            "Manual refresh only - no automatic TODO detection",
+            "Scan for TODOs only when files are saved",
+            "Real-time scanning - detects TODOs as you type (may impact performance)"
+          ],
+          "default": "activeScan",
+          "description": "Controls when the extension scans for TODO comments in your code",
+          "markdownDescription": "Controls when the extension scans for TODO comments in your code:\n\n- **Off**: Manual refresh only\n- **On Save**: Scan only when files are saved\n- **Active Scan**: Real-time scanning as you type"
+        }
+      }
     }
   },
   "scripts": {

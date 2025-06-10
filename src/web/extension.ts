@@ -92,6 +92,135 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Initialize CodeLens provider with current todos
   codeLensProvider.updateTodos(provider.getTodos());
+
+  // Set up document change listener for real-time TODO synchronization
+  let updateTimeout: NodeJS.Timeout | undefined;
+
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      // Only process file documents in workspace
+      if (
+        event.document.uri.scheme !== "file" ||
+        !vscode.workspace.workspaceFolders
+      ) {
+        return;
+      }
+
+      // Check if file is in workspace and supported
+      const isInWorkspace = vscode.workspace.workspaceFolders.some((folder) =>
+        event.document.uri.fsPath.startsWith(folder.uri.fsPath)
+      );
+
+      if (!isInWorkspace) {
+        return;
+      }
+
+      // Check if it's a supported file type
+      const supportedLanguages = [
+        "typescript",
+        "javascript",
+        "typescriptreact",
+        "javascriptreact",
+        "python",
+        "java",
+        "csharp",
+        "cpp",
+        "c",
+        "php",
+        "ruby",
+        "go",
+        "rust",
+        "swift",
+        "kotlin",
+        "vue",
+        "html",
+        "css",
+        "scss",
+        "less",
+      ];
+
+      if (!supportedLanguages.includes(event.document.languageId)) {
+        return;
+      }
+
+      // Debounce the updates to avoid excessive processing while typing
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+      }
+
+      // Check if scanning should be performed for text changes
+      if (!provider.shouldScan("change")) {
+        return;
+      }
+
+      updateTimeout = setTimeout(() => {
+        provider.scanSingleDocument(event.document);
+      }, 500); // 500ms delay after last change
+    })
+  );
+
+  // Also listen for document save events for immediate updates
+  context.subscriptions.push(
+    vscode.workspace.onDidSaveTextDocument((document) => {
+      // Only process file documents in workspace
+      if (
+        document.uri.scheme !== "file" ||
+        !vscode.workspace.workspaceFolders
+      ) {
+        return;
+      }
+
+      // Check if file is in workspace and supported
+      const isInWorkspace = vscode.workspace.workspaceFolders.some((folder) =>
+        document.uri.fsPath.startsWith(folder.uri.fsPath)
+      );
+
+      if (!isInWorkspace) {
+        return;
+      }
+
+      // Check if it's a supported file type
+      const supportedLanguages = [
+        "typescript",
+        "javascript",
+        "typescriptreact",
+        "javascriptreact",
+        "python",
+        "java",
+        "csharp",
+        "cpp",
+        "c",
+        "php",
+        "ruby",
+        "go",
+        "rust",
+        "swift",
+        "kotlin",
+        "vue",
+        "html",
+        "css",
+        "scss",
+        "less",
+      ];
+
+      if (!supportedLanguages.includes(document.languageId)) {
+        return;
+      }
+
+      // Clear any pending debounced update and scan immediately on save
+      if (updateTimeout) {
+        clearTimeout(updateTimeout);
+        updateTimeout = undefined;
+      }
+
+      // Check if scanning should be performed for file saves
+      if (!provider.shouldScan("save")) {
+        return;
+      }
+
+      provider.scanSingleDocument(document);
+    })
+  );
 }
 
 // This method is called when your extension is deactivated
