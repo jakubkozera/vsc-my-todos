@@ -183,27 +183,166 @@ function toggleSortPopup() {
 }
 
 function updateSort() {
-	const sortByElements = document.getElementsByName('sortBy');
-	const sortOrderElements = document.getElementsByName('sortOrder');
+	// Apply sorting - this function is now called from dropdown selections
+	applyFilters();
+}
+
+function toggleSortByDropdown() {
+	const menu = document.getElementById('sortByDropdownMenu');
+	menu.classList.toggle('active');
+}
+
+function toggleSortOrderDropdown() {
+	const menu = document.getElementById('sortOrderDropdownMenu');
+	menu.classList.toggle('active');
+}
+
+function selectSortBy(value) {
+	// Update the sort setting
+	sortSettings.sortBy = value;
 	
-	// Get selected sort by value
-	for (let element of sortByElements) {
-		if (element.checked) {
-			sortSettings.sortBy = element.value;
-			break;
+	// Update visual selection
+	const options = document.querySelectorAll('#sortByDropdownMenu .sort-by-dropdown-option');
+	options.forEach(option => {
+		if (option.getAttribute('data-value') === value) {
+			option.classList.add('selected');
+		} else {
+			option.classList.remove('selected');
 		}
-	}
+	});
 	
-	// Get selected sort order value
-	for (let element of sortOrderElements) {
-		if (element.checked) {
-			sortSettings.sortOrder = element.value;
-			break;
-		}
-	}
+	// Update button text
+	updateSortByButtonText();
+	
+	// Close dropdown
+	document.getElementById('sortByDropdownMenu').classList.remove('active');
 	
 	// Apply sorting
-	applyFilters();
+	updateSort();
+}
+
+function selectSortOrder(value) {
+	// Update the sort setting
+	sortSettings.sortOrder = value;
+	
+	// Update visual selection
+	const options = document.querySelectorAll('#sortOrderDropdownMenu .sort-order-dropdown-option');
+	options.forEach(option => {
+		if (option.getAttribute('data-value') === value) {
+			option.classList.add('selected');
+		} else {
+			option.classList.remove('selected');
+		}
+	});
+	
+	// Update button text
+	updateSortOrderButtonText();
+	
+	// Close dropdown
+	document.getElementById('sortOrderDropdownMenu').classList.remove('active');
+	
+	// Apply sorting
+	updateSort();
+}
+
+function updateSortByButtonText() {
+	const button = document.getElementById('sortByDropdownButton');
+	const textSpan = button.querySelector('.sort-by-dropdown-text');
+	
+	switch (sortSettings.sortBy) {
+		case 'type':
+			textSpan.innerHTML = \`
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"></path>
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z"></path>
+					</svg>
+					<span>Type</span>
+				</div>
+			\`;
+			break;
+		case 'status':
+			textSpan.innerHTML = \`
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<circle cx="12" cy="12" r="8" fill="#007acc" />
+					</svg>
+					<span>Status</span>
+				</div>
+			\`;
+			break;
+		case 'created':
+			textSpan.innerHTML = \`
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"></path>
+					</svg>
+					<span>Created Date</span>
+				</div>
+			\`;
+			break;
+	}
+}
+
+function updateSortOrderButtonText() {
+	const button = document.getElementById('sortOrderDropdownButton');
+	const textSpan = button.querySelector('.sort-order-dropdown-text');
+	
+	switch (sortSettings.sortOrder) {
+		case 'desc':
+			textSpan.innerHTML = \`
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m6.75 4.5L21 14.25m0 0L18 11.25m3 3H7.5"></path>
+					</svg>
+					<span>Descending</span>
+				</div>
+			\`;
+			break;
+		case 'asc':
+			textSpan.innerHTML = \`
+				<div style="display: flex; align-items: center; gap: 8px;">
+					<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m0 0-3-3m3 3-3 3M21 14.25H10.5"></path>
+					</svg>
+					<span>Ascending</span>
+				</div>
+			\`;
+			break;
+	}
+}
+
+function resetSort() {
+	// Reset to default values
+	sortSettings.sortBy = 'type';
+	sortSettings.sortOrder = 'desc';
+	
+	// Update sort by dropdown selection
+	const sortByOptions = document.querySelectorAll('#sortByDropdownMenu .sort-by-dropdown-option');
+	sortByOptions.forEach(option => {
+		if (option.getAttribute('data-value') === 'type') {
+			option.classList.add('selected');
+		} else {
+			option.classList.remove('selected');
+		}
+	});
+	
+	// Update sort order dropdown selection
+	const sortOrderOptions = document.querySelectorAll('#sortOrderDropdownMenu .sort-order-dropdown-option');
+	sortOrderOptions.forEach(option => {
+		if (option.getAttribute('data-value') === 'desc') {
+			option.classList.add('selected');
+		} else {
+			option.classList.remove('selected');
+		}
+	});
+	
+	// Update button texts
+	updateSortByButtonText();
+	updateSortOrderButtonText();
+	
+	// Apply sorting
+	updateSort();
 }
 
 function sortTodos(todosToSort) {
@@ -686,8 +825,7 @@ document.addEventListener('click', function(event) {
 		!statusDropdownButton.contains(event.target)) {
 		statusDropdown.classList.remove('active');
 	}
-	
-	// Close type dropdown when clicking outside (but not when clicking on options inside)
+		// Close type dropdown when clicking outside (but not when clicking on options inside)
 	const typeDropdown = document.getElementById('typeDropdownMenu');
 	const typeDropdownButton = document.getElementById('typeDropdownButton');
 	if (typeDropdown && typeDropdown.classList.contains('active') &&
@@ -695,8 +833,30 @@ document.addEventListener('click', function(event) {
 		!typeDropdownButton.contains(event.target)) {
 		typeDropdown.classList.remove('active');
 	}
+	
+	// Close sort by dropdown when clicking outside
+	const sortByDropdown = document.getElementById('sortByDropdownMenu');
+	const sortByDropdownButton = document.getElementById('sortByDropdownButton');
+	if (sortByDropdown && sortByDropdown.classList.contains('active') &&
+		!sortByDropdown.contains(event.target) && 
+		!sortByDropdownButton.contains(event.target)) {
+		sortByDropdown.classList.remove('active');
+	}
+	
+	// Close sort order dropdown when clicking outside
+	const sortOrderDropdown = document.getElementById('sortOrderDropdownMenu');
+	const sortOrderDropdownButton = document.getElementById('sortOrderDropdownButton');
+	if (sortOrderDropdown && sortOrderDropdown.classList.contains('active') &&
+		!sortOrderDropdown.contains(event.target) && 
+		!sortOrderDropdownButton.contains(event.target)) {
+		sortOrderDropdown.classList.remove('active');
+	}
 });
 
 // Initial render
 applyFilters();
+
+// Initialize sort dropdown texts
+updateSortByButtonText();
+updateSortOrderButtonText();
 `;

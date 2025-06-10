@@ -131,29 +131,174 @@ body {
 	color: var(--vscode-foreground);
 }
 
-.sort-options {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
+/* Sort by dropdown styles */
+.sort-by-dropdown {
+	position: relative;
 }
 
-.sort-option {
+.sort-by-dropdown-button {
+	width: 100%;
+	background-color: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border: 1px solid var(--vscode-input-border);
+	padding: 6px 8px;
+	font-size: 12px;
+	border-radius: 2px;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	box-sizing: border-box;
+}
+
+.sort-by-dropdown-button:focus {
+	outline: 1px solid var(--vscode-focusBorder);
+}
+
+.sort-by-dropdown-button:hover {
+	background-color: var(--vscode-list-hoverBackground);
+}
+
+.sort-by-dropdown-text {
+	flex: 1;
+	text-align: left;
+}
+
+.sort-by-dropdown-menu {
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background-color: var(--vscode-dropdown-background);
+	border: 1px solid var(--vscode-dropdown-border);
+	border-radius: 2px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	z-index: 1001;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.sort-by-dropdown-menu.active {
+	display: block;
+}
+
+.sort-by-dropdown-option {
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	padding: 8px 12px;
 	cursor: pointer;
 	font-size: 12px;
-	font-weight: normal;
-	margin: 0;
+	color: var(--vscode-dropdown-foreground);
+	border-radius: 2px;
+	margin: 2px 4px;
+	transition: background-color 0.2s ease;
 }
 
-.sort-option input[type="radio"] {
-	margin: 0;
-	width: auto;
+.sort-by-dropdown-option:hover {
+	background-color: var(--vscode-list-hoverBackground);
 }
 
-.sort-option span {
-	color: var(--vscode-foreground);
+.sort-by-dropdown-option.selected {
+	background-color: var(--vscode-list-activeSelectionBackground);
+	color: var(--vscode-list-activeSelectionForeground);
+}
+
+.sort-by-dropdown-option.selected:hover {
+	background-color: var(--vscode-list-activeSelectionBackground);
+}
+
+.sort-by-dropdown-option svg {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	stroke: var(--vscode-foreground);
+}
+
+/* Sort order dropdown styles */
+.sort-order-dropdown {
+	position: relative;
+}
+
+.sort-order-dropdown-button {
+	width: 100%;
+	background-color: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	border: 1px solid var(--vscode-input-border);
+	padding: 6px 8px;
+	font-size: 12px;
+	border-radius: 2px;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	box-sizing: border-box;
+}
+
+.sort-order-dropdown-button:focus {
+	outline: 1px solid var(--vscode-focusBorder);
+}
+
+.sort-order-dropdown-button:hover {
+	background-color: var(--vscode-list-hoverBackground);
+}
+
+.sort-order-dropdown-text {
+	flex: 1;
+	text-align: left;
+}
+
+.sort-order-dropdown-menu {
+	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background-color: var(--vscode-dropdown-background);
+	border: 1px solid var(--vscode-dropdown-border);
+	border-radius: 2px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	z-index: 1001;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.sort-order-dropdown-menu.active {
+	display: block;
+}
+
+.sort-order-dropdown-option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	cursor: pointer;
+	font-size: 12px;
+	color: var(--vscode-dropdown-foreground);
+	border-radius: 2px;
+	margin: 2px 4px;
+	transition: background-color 0.2s ease;
+}
+
+.sort-order-dropdown-option:hover {
+	background-color: var(--vscode-list-hoverBackground);
+}
+
+.sort-order-dropdown-option.selected {
+	background-color: var(--vscode-list-activeSelectionBackground);
+	color: var(--vscode-list-activeSelectionForeground);
+}
+
+.sort-order-dropdown-option.selected:hover {
+	background-color: var(--vscode-list-activeSelectionBackground);
+}
+
+.sort-order-dropdown-option svg {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	stroke: var(--vscode-foreground);
 }
 
 .todo-list {
@@ -829,5 +974,25 @@ body {
 	height: 16px;
 	flex-shrink: 0;
 	stroke: var(--vscode-foreground);
+}
+
+/* Sort actions styles */
+.sort-actions {
+	margin-top: 16px;
+	text-align: right;
+}
+
+.reset-sort-button {
+	background-color: var(--vscode-button-secondaryBackground);
+	color: var(--vscode-button-secondaryForeground);
+	border: none;
+	padding: 6px 12px;
+	cursor: pointer;
+	border-radius: 2px;
+	font-size: 12px;
+}
+
+.reset-sort-button:hover {
+	background-color: var(--vscode-button-secondaryHoverBackground);
 }
 `;

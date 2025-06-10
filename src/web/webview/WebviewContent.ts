@@ -117,7 +117,6 @@ export function getWebviewContent(): string {
 				</div>
 			</div>
 		</div>	</div>
-
 	<!-- Sort Popup -->
 	<div class="sort-popup" id="sortPopup">
 		<div class="sort-popup-content">
@@ -128,36 +127,65 @@ export function getWebviewContent(): string {
 			<div class="sort-body">
 				<div class="sort-group">
 					<label>Sort by:</label>
-					<div class="sort-options">
-						<label class="sort-option">
-							<input type="radio" name="sortBy" value="type" onchange="updateSort()" checked>
-							<span>Type</span>
-						</label>
-						<label class="sort-option">
-							<input type="radio" name="sortBy" value="status" onchange="updateSort()">
-							<span>Status</span>
-						</label>
-						<label class="sort-option">
-							<input type="radio" name="sortBy" value="created" onchange="updateSort()">
-							<span>Created Date</span>
-						</label>
+					<div class="sort-by-dropdown">
+						<button class="sort-by-dropdown-button" onclick="toggleSortByDropdown()" id="sortByDropdownButton">
+							<span class="sort-by-dropdown-text">Type</span>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+						<div class="sort-by-dropdown-menu" id="sortByDropdownMenu">
+							<div class="sort-by-dropdown-option selected" data-value="type" onclick="selectSortBy('type')">
+								<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 0 0 3 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 0 0 5.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 0 0 9.568 3Z"></path>
+									<path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6Z"></path>
+								</svg>
+								<span>Type</span>
+							</div>
+							<div class="sort-by-dropdown-option" data-value="status" onclick="selectSortBy('status')">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<circle cx="12" cy="12" r="8" fill="#007acc" />
+								</svg>
+								<span>Status</span>
+							</div>
+							<div class="sort-by-dropdown-option" data-value="created" onclick="selectSortBy('created')">
+								<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"></path>
+								</svg>
+								<span>Created Date</span>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="sort-group">
 					<label>Sort order:</label>
-					<div class="sort-options">
-						<label class="sort-option">
-							<input type="radio" name="sortOrder" value="desc" onchange="updateSort()" checked>
-							<span>Descending</span>
-						</label>
-						<label class="sort-option">
-							<input type="radio" name="sortOrder" value="asc" onchange="updateSort()">
-							<span>Ascending</span>
-						</label>
-					</div>
+					<div class="sort-order-dropdown">
+						<button class="sort-order-dropdown-button" onclick="toggleSortOrderDropdown()" id="sortOrderDropdownButton">
+							<span class="sort-order-dropdown-text">Descending</span>
+							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+						<div class="sort-order-dropdown-menu" id="sortOrderDropdownMenu">
+							<div class="sort-order-dropdown-option selected" data-value="desc" onclick="selectSortOrder('desc')">
+								<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m6.75 4.5L21 14.25m0 0L18 11.25m3 3H7.5"></path>
+								</svg>
+								<span>Descending</span>
+							</div>
+							<div class="sort-order-dropdown-option" data-value="asc" onclick="selectSortOrder('asc')">
+								<svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="16" height="16">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m0 0-3-3m3 3-3 3M21 14.25H10.5"></path>
+								</svg>
+								<span>Ascending</span>
+							</div>					</div>
+				</div>
+				<div class="sort-actions">
+					<button class="reset-sort-button" onclick="resetSort()">Reset to Default</button>
 				</div>
 			</div>
 		</div>
+	</div>
 	</div>
 	
 	<ul class="todo-list" id="todoList">
