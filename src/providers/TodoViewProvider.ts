@@ -61,43 +61,39 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
     webviewView.onDidChangeVisibility(() => {
       if (webviewView.visible) {
         // Force refresh webview when it becomes visible
-        this.forceRefreshWebview(); // If code todos haven't been initialized yet, scan them
-        if (!this.isInitialized) {
-          // In web extensions, make the timeout even shorter for visibility changes
-          Promise.race([
-            this.scanCodeTodos(),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error("Quick scan timeout")), 3000)
-            ),
-          ])
+        this.forceRefreshWebview();
+
+        // Always scan for code todos when view becomes visible (respecting scan mode settings)
+        const scanMode = this.getScanMode();
+        debugger;
+        if (scanMode !== "off") {
+          // Scan for code todos when view becomes visible
+          this.scanCodeTodos()
             .then(() => {
               this.isInitialized = true;
             })
             .catch((error) => {
-              console.warn("Quick code scanning failed:", error);
+              console.warn("Code scanning failed:", error);
               this.isInitialized = true;
             });
+        } else if (!this.isInitialized) {
+          // If scanning is off but we haven't initialized yet, mark as initialized
+          this.isInitialized = true;
         }
       }
     }); // Initialize webview with current todos first
     this.refreshView(); // Then scan for code todos asynchronously and refresh again when done
-    // Add timeout and error handling to prevent infinite loading
-    Promise.race([
-      this.scanCodeTodos(),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Scan timeout")), 5000)
-      ), // Reduced to 5 second timeout for web extensions
-    ])
+    this.scanCodeTodos()
       .then(() => {
         console.log("Code scanning completed successfully");
         this.isInitialized = true;
       })
       .catch((error) => {
-        console.warn("Code scanning failed or timed out:", error);
+        console.warn("Code scanning failed:", error);
         this.isInitialized = true; // Mark as initialized anyway to prevent hanging
         // Show a warning to the user but don't block the extension
         vscode.window.showWarningMessage(
-          "TODO scanning completed with issues. Some code TODOs may not be shown. (Web extension mode has limited file access)"
+          "TODO scanning completed with issues. Some code TODOs may not be shown."
         );
       });
   }
@@ -364,30 +360,18 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
           // Skip gitignore loading in web extensions to avoid hanging
           console.log(
             "Skipping gitignore patterns for web extension compatibility"
+          ); // Use limited file patterns for web extensions
+          const files = await vscode.workspace.findFiles(
+            new vscode.RelativePattern(
+              workspaceFolder,
+              "**/*.{ts,js,tsx,jsx}" // Only scan common web files
+            ),
+            new vscode.RelativePattern(
+              workspaceFolder,
+              "{node_modules,dist,build,out,target,coverage,.git}/**"
+            )
           );
-
-          // Use much shorter timeout and limited file patterns for web extensions
-          const files = await Promise.race([
-            vscode.workspace.findFiles(
-              new vscode.RelativePattern(
-                workspaceFolder,
-                "**/*.{ts,js,tsx,jsx}" // Only scan common web files
-              ),
-              new vscode.RelativePattern(
-                workspaceFolder,
-                "{node_modules,dist,build,out,target,coverage,.git}/**"
-              )
-            ),
-            new Promise<vscode.Uri[]>(
-              (resolve) =>
-                setTimeout(() => {
-                  console.log(
-                    "File search timed out - resolving with empty array"
-                  );
-                  resolve([]);
-                }, 2000) // Very short 2 second timeout for web extensions
-            ),
-          ]);
+          debugger;
 
           console.log(`Found ${files.length} files to scan`);
 
@@ -410,20 +394,12 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
           ) {
             const file = limitedFiles[fileIndex];
             try {
-              // More frequent yields for web extensions
+              // Yield occasionally for better performance
               if (fileIndex % 10 === 0) {
                 await new Promise((resolve) => setTimeout(resolve, 5));
               }
 
-              const document = await Promise.race([
-                vscode.workspace.openTextDocument(file),
-                new Promise<never>((_, reject) =>
-                  setTimeout(
-                    () => reject(new Error(`Timeout opening ${file.fsPath}`)),
-                    1000 // Much shorter timeout for web extensions
-                  )
-                ),
-              ]);
+              const document = await vscode.workspace.openTextDocument(file);
 
               const text = document.getText();
 
