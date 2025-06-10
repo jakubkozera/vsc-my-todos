@@ -54,9 +54,19 @@ body {
 	border-radius: 3px;
 	margin-bottom: 6px;
 	padding: 8px;
+	padding-bottom: 0px;
 	background-color: var(--vscode-input-background);
 	position: relative;
 	border-left: 2px solid var(--vscode-input-border);
+	transition: padding-bottom 0.2s ease;
+}
+
+.todo-item:has(.todo-description.empty) {
+	padding-bottom: 8px;
+}
+
+.todo-item:hover:has(.todo-description.empty) {
+	padding-bottom: 0px;
 }
 
 .todo-item.status-todo {
@@ -131,11 +141,31 @@ body {
 	border-radius: 2px;
 	resize: vertical;
 	min-height: 16px;
+	transition: opacity 0.2s ease, max-height 0.2s ease, margin-bottom 0.2s ease;
 }
 
 .todo-description:focus {
 	outline: 1px solid var(--vscode-focusBorder);
 	background-color: var(--vscode-input-background);
+}
+
+.todo-description.empty {
+	opacity: 0;
+	max-height: 0;
+	margin-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+.todo-item:hover .todo-description.empty {
+	opacity: 1;
+	max-height: 100px;
+	margin-bottom: 4px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	min-height: 16px;
 }
 
 .todo-description.empty::placeholder {
@@ -147,6 +177,20 @@ body {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	margin-top: 4px;
+	transition: opacity 0.2s ease, max-height 0.2s ease, margin-top 0.2s ease;
+}
+
+.todo-item:has(.todo-description.empty) .todo-actions {
+	opacity: 0;
+	max-height: 0;
+	margin-top: 0;
+	overflow: hidden;
+}
+
+.todo-item:hover:has(.todo-description.empty) .todo-actions {
+	opacity: 1;
+	max-height: 50px;
 	margin-top: 4px;
 }
 
