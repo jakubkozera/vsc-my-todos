@@ -343,6 +343,14 @@ body {
 }
 
 .todo-item.completed {
+	/* Remove global opacity - apply to specific elements instead */
+}
+
+.todo-item.completed .todo-title,
+.todo-item.completed .todo-description,
+.todo-item.completed .status-icon-button,
+.todo-item.completed .type-icon-button,
+.todo-item.completed .delete-button {
 	opacity: 0.6;
 }
 
