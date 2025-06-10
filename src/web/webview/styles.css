@@ -51,8 +51,8 @@ body {
 .todo-item {
 	border: 1px solid var(--vscode-input-border);
 	border-radius: 3px;
-	margin-bottom: 8px;
-	padding: 12px;
+	margin-bottom: 6px;
+	padding: 8px;
 	background-color: var(--vscode-input-background);
 	position: relative;
 	border-left: 2px solid var(--vscode-input-border);
@@ -66,7 +66,7 @@ body {
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
-	margin-bottom: 8px;
+	margin-bottom: 4px;
 }
 
 .todo-title {
@@ -97,11 +97,11 @@ body {
 	color: var(--vscode-foreground);
 	font-size: 12px;
 	width: 100%;
-	margin-bottom: 8px;
+	margin-bottom: 4px;
 	padding: 2px 4px;
 	border-radius: 2px;
 	resize: vertical;
-	min-height: 20px;
+	min-height: 16px;
 }
 
 .todo-description:focus {
@@ -118,12 +118,12 @@ body {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-top: 8px;
+	margin-top: 4px;
 }
 
 .todo-controls {
 	display: flex;
-	gap: 8px;
+	gap: 6px;
 	align-items: center;
 }
 
