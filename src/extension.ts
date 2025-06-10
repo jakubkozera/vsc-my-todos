@@ -8,7 +8,7 @@ import { TodoCodeLensProvider } from "./providers/TodoCodeLensProvider";
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
   try {
-    console.log("My Todos extension is now active!");
+    console.log("My Todos extension is now active! (Regular Extension Mode)");
 
     const provider = new TodoViewProvider(context.extensionUri, context);
 
@@ -103,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     // Set up document change listener for real-time TODO synchronization
-    let updateTimeout: number | undefined;
+    let updateTimeout: NodeJS.Timeout | undefined;
 
     context.subscriptions.push(
       vscode.workspace.onDidChangeTextDocument((event) => {

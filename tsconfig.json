@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "Node16",
     "target": "ES2020",
-    "outDir": "dist",
+    "outDir": "out",
     "lib": ["ES2020", "WebWorker"],
     "sourceMap": true,
     "rootDir": "src",
@@ -18,6 +18,7 @@
     "test-codelens.ts",
     "test-realtime-sync.ts",
     "test-realtime-todos.ts",
+    "src/web/**",
     "dist/**",
     "out/**",
     "node_modules/**"
