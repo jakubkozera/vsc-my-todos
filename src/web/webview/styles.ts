@@ -58,15 +58,10 @@ body {
 	background-color: var(--vscode-input-background);
 	position: relative;
 	border-left: 2px solid var(--vscode-input-border);
-	transition: padding-bottom 0.2s ease;
 }
 
-.todo-item:has(.todo-description.empty) {
+.todo-item.has-empty-description {
 	padding-bottom: 8px;
-}
-
-.todo-item:hover:has(.todo-description.empty) {
-	padding-bottom: 0px;
 }
 
 .todo-item.status-todo {
@@ -93,19 +88,19 @@ body {
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
-	margin-bottom: 4px;
+	margin-bottom: 2px;
 }
 
 .todo-header-actions {
 	display: flex;
 	align-items: center;
-	gap: 4px;
+	gap: 2px;
 }
 
 .todo-title-row {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 4px;
 	flex: 1;
 }
 
@@ -114,7 +109,7 @@ body {
 	border: none;
 	color: var(--vscode-foreground);
 	font-size: 14px;
-	font-weight: 600;
+	font-weight: 500;
 	width: 100%;
 	padding: 2px 4px;
 	border-radius: 2px;
@@ -141,7 +136,6 @@ body {
 	border-radius: 2px;
 	resize: vertical;
 	min-height: 16px;
-	transition: opacity 0.2s ease, max-height 0.2s ease, margin-bottom 0.2s ease;
 }
 
 .todo-description:focus {
@@ -149,48 +143,20 @@ body {
 	background-color: var(--vscode-input-background);
 }
 
-.todo-description.empty {
-	opacity: 0;
-	max-height: 0;
-	margin-bottom: 0;
-	padding-top: 0;
-	padding-bottom: 0;
-	min-height: 0;
-	overflow: hidden;
-}
-
-.todo-item:hover .todo-description.empty {
-	opacity: 1;
-	max-height: 100px;
-	margin-bottom: 4px;
-	padding-top: 2px;
-	padding-bottom: 2px;
-	min-height: 16px;
-}
-
-.todo-description.empty::placeholder {
+.todo-description::placeholder {
 	color: var(--vscode-input-placeholderForeground);
 	font-style: italic;
+}
+
+.todo-description-placeholder,
+.todo-actions-placeholder {
+	/* Placeholders for dynamically inserted content */
 }
 
 .todo-actions {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-top: 4px;
-	transition: opacity 0.2s ease, max-height 0.2s ease, margin-top 0.2s ease;
-}
-
-.todo-item:has(.todo-description.empty) .todo-actions {
-	opacity: 0;
-	max-height: 0;
-	margin-top: 0;
-	overflow: hidden;
-}
-
-.todo-item:hover:has(.todo-description.empty) .todo-actions {
-	opacity: 1;
-	max-height: 50px;
 	margin-top: 4px;
 }
 
@@ -204,7 +170,7 @@ body {
 	background: none;
 	border: none;
 	cursor: pointer;
-	padding: 2px;
+	padding: 1px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -217,15 +183,15 @@ body {
 }
 
 .status-icon-button svg {
-	width: 20px;
-	height: 20px;
+	width: 18px;
+	height: 18px;
 }
 
 .type-icon-button {
 	background: none;
 	border: none;
 	cursor: pointer;
-	padding: 2px;
+	padding: 1px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -238,8 +204,8 @@ body {
 }
 
 .type-icon-button svg {
-	width: 20px;
-	height: 20px;
+	width: 18px;
+	height: 18px;
 	stroke: var(--vscode-foreground);
 }
 
@@ -359,8 +325,8 @@ body {
 	border: none;
 	color: var(--vscode-errorForeground);
 	cursor: pointer;
-	padding: 4px;
-	font-size: 18px;
+	padding: 2px;
+	font-size: 16px;
 	line-height: 1;
 	opacity: 0;
 	transition: opacity 0.1s ease;

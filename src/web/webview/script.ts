@@ -149,8 +149,14 @@ function onTitleChange(id, value) {
 function onDescriptionChange(id, value) {
 	const todo = todos.find(t => t.id === id);
 	if (todo) {
+		const wasEmpty = !todo.description;
 		todo.description = value;
 		updateTodo(id);
+		
+		// If description changed from empty to non-empty, re-render to update the structure
+		if (wasEmpty && value.trim()) {
+			renderTodos();
+		}
 	}
 }
 
@@ -411,9 +417,11 @@ function renderTodos() {
 			todoList.innerHTML = '<li class="no-todos">No todos yet. Click "Add" to create your first todo!</li>';
 		}
 		return;
-	}
-	todoList.innerHTML = todosToRender.map(todo => \`
-		<li class="todo-item status-\${todo.status} \${todo.status === 'done' ? 'completed' : ''}">
+	}	todoList.innerHTML = todosToRender.map(todo => \`
+		<li class="todo-item status-\${todo.status} \${todo.status === 'done' ? 'completed' : ''} \${!todo.description ? 'has-empty-description' : ''}" 
+			data-todo-id="\${todo.id}"
+			onmouseenter="handleTodoMouseEnter('\${todo.id}')"
+			onmouseleave="handleTodoMouseLeave('\${todo.id}')">
 			<div class="todo-header">				<div class="todo-title-row">
 					<div style="position: relative;">
 						<button class="status-icon-button" onclick="toggleStatusPopup('\${todo.id}', event)" title="Change status">
@@ -456,6 +464,9 @@ function renderTodos() {
 						onchange="onTitleChange('\${todo.id}', this.value)"
 						\${todo.status === 'done' ? 'readonly' : ''}
 					/>
+					<button class="delete-button" onclick="deleteTodo('\${todo.id}')" title="Delete todo">
+						×
+					</button>
 					<div style="position: relative;">
 						<button class="type-icon-button" onclick="toggleTypePopup('\${todo.id}', event)" title="Change type">
 							\${getTypeIcon(todo.type)}
@@ -476,25 +487,75 @@ function renderTodos() {
 						</div>
 					</div>
 				</div>
-				<button class="delete-button" onclick="deleteTodo('\${todo.id}')" title="Delete todo">
-					×
-				</button>
 			</div>
-			<textarea 
-				class="todo-description \${!todo.description ? 'empty' : ''}" 
+			\${todo.description ? \`<textarea 
+				class="todo-description" 
 				placeholder="Description"
 				onchange="onDescriptionChange('\${todo.id}', this.value)"
 				\${todo.status === 'done' ? 'readonly' : ''}
-			>\${todo.description}</textarea>			<div class="todo-actions">
+			>\${todo.description}</textarea>\` : ''}
+			<div class="todo-description-placeholder" id="description-placeholder-\${todo.id}"></div>
+			\${todo.description ? \`<div class="todo-actions">
 				<div class="todo-controls">
 				</div>
-			</div>
+			</div>\` : \`<div class="todo-actions-placeholder" id="actions-placeholder-\${todo.id}"></div>\`}
 		</li>
 	\`).join('');
 }
 
 function hasActiveFilters() {
 	return filters.text !== '' || filters.statuses.length > 0 || filters.types.length > 0;
+}
+
+function handleTodoMouseEnter(todoId) {
+	const todo = todos.find(t => t.id === todoId);
+	if (!todo || todo.description) return; // Only handle empty descriptions
+	
+	const placeholder = document.getElementById(\`description-placeholder-\${todoId}\`);
+	const actionsPlaceholder = document.getElementById(\`actions-placeholder-\${todoId}\`);
+	
+	if (placeholder && !placeholder.querySelector('.todo-description')) {
+		// Create and insert description textarea
+		const textarea = document.createElement('textarea');
+		textarea.className = 'todo-description';
+		textarea.placeholder = 'Description';
+		textarea.value = todo.description || '';
+		textarea.setAttribute('onchange', \`onDescriptionChange('\${todoId}', this.value)\`);
+		if (todo.status === 'done') {
+			textarea.setAttribute('readonly', '');
+		}
+		placeholder.appendChild(textarea);
+		
+		// Create and insert actions div
+		if (actionsPlaceholder && !actionsPlaceholder.querySelector('.todo-actions')) {
+			const actionsDiv = document.createElement('div');
+			actionsDiv.className = 'todo-actions';
+			actionsDiv.innerHTML = '<div class="todo-controls"></div>';
+			actionsPlaceholder.appendChild(actionsDiv);
+		}
+	}
+}
+
+function handleTodoMouseLeave(todoId) {
+	const todo = todos.find(t => t.id === todoId);
+	if (!todo || todo.description) return; // Only handle empty descriptions
+	
+	const placeholder = document.getElementById(\`description-placeholder-\${todoId}\`);
+	const actionsPlaceholder = document.getElementById(\`actions-placeholder-\${todoId}\`);
+	
+	// Check if the textarea has content before removing
+	const textarea = placeholder?.querySelector('.todo-description');
+	if (textarea && !textarea.value.trim()) {
+		// Remove description textarea
+		if (placeholder) {
+			placeholder.innerHTML = '';
+		}
+		
+		// Remove actions div
+		if (actionsPlaceholder) {
+			actionsPlaceholder.innerHTML = '';
+		}
+	}
 }
 
 // Close popup when clicking outside
