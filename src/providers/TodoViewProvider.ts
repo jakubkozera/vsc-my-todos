@@ -47,12 +47,6 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
         case "refreshCodeTodos":
           this.scanCodeTodos();
           break;
-        case "getScanMode":
-          this.sendScanModeToWebview();
-          break;
-        case "updateScanMode":
-          this.updateScanMode(data.scanMode);
-          break;
         case "openExternalLink":
           vscode.env.openExternal(vscode.Uri.parse(data.url));
           break;
@@ -359,7 +353,7 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
               ),
               new vscode.RelativePattern(
                 workspaceFolder,
-                "{node_modules,dist,build,out,target,coverage,.git,__pycache__,*.pyc,*.pyo,*.egg-info}/**"
+                "**/{node_modules,dist,build,out,target,coverage,.git,__pycache__,*.pyc,*.pyo,*.egg-info}/**"
               )
             );
           } catch (error) {
@@ -675,26 +669,6 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
   private getScanMode(): string {
     const config = vscode.workspace.getConfiguration("my-todos");
     return config.get("scanMode", "activeScan");
-  }
-
-  private async updateScanMode(scanMode: string): Promise<void> {
-    const config = vscode.workspace.getConfiguration("my-todos");
-    await config.update(
-      "scanMode",
-      scanMode,
-      vscode.ConfigurationTarget.Global
-    );
-    // Send confirmation back to webview
-    this.sendScanModeToWebview();
-  }
-
-  private sendScanModeToWebview(): void {
-    if (this._view) {
-      this._view.webview.postMessage({
-        type: "setScanMode",
-        scanMode: this.getScanMode(),
-      });
-    }
   }
   // Method to check if scanning should be performed based on current settings
   public shouldScan(trigger: "change" | "save"): boolean {

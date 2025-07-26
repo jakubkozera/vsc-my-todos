@@ -72,6 +72,12 @@ export function activate(context: vscode.ExtensionContext) {
       })
     );
 
+    context.subscriptions.push(
+      vscode.commands.registerCommand("my-todos.openSettings", () => {
+        vscode.commands.executeCommand("workbench.action.openSettings", "my-todos");
+      })
+    );
+
     // Command for CodeLens to show todos view
     context.subscriptions.push(
       vscode.commands.registerCommand(

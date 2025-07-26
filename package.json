@@ -56,6 +56,11 @@
       {
         "command": "myTodos.showTodosView",
         "title": "Show Todos View"
+      },
+      {
+        "command": "my-todos.openSettings",
+        "title": "Open My Todos Settings",
+        "icon": "$(settings-gear)"
       }
     ],
     "menus": {
@@ -72,6 +77,11 @@
         },
         {
           "command": "my-todos.refreshCodeTodos",
+          "when": "view == todoView",
+          "group": "navigation"
+        },
+        {
+          "command": "my-todos.openSettings",
           "when": "view == todoView",
           "group": "navigation"
         }
@@ -94,7 +104,7 @@
           ],
           "default": "activeScan",
           "description": "Controls when the extension scans for TODO comments in your code",
-          "markdownDescription": "Controls when the extension scans for TODO comments in your code:\n\n- **Off**: Manual refresh only\n- **On Save**: Scan only when files are saved\n- **Active Scan**: Real-time scanning as you type"
+          "markdownDescription": "Controls when the extension scans for TODO comments in your code:\n\n- **Off**: Manual refresh only\n- **On Save**: Scan only when files are saved\n- **Active Scan**: Real-time scanning as you type\n\n💡 You can also access this setting by clicking the settings button in the My Todos view."
         }
       }
     }
