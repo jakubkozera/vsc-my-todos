@@ -690,8 +690,8 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
     const config = vscode.workspace.getConfiguration("my-todos");
     const customPatterns = config.get("excludePatterns", "");
     
-    // Default patterns that are always applied
-    const defaultPatterns = "node_modules,dist,build,out,target,coverage,.git,__pycache__,*.pyc,*.pyo,*.egg-info";
+    // Default patterns that are always applied (folder names only)
+    const defaultPatterns = "node_modules,dist,build,out,target,coverage,.git,__pycache__";
     
     // Combine default patterns with custom patterns
     if (customPatterns.trim()) {

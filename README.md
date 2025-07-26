@@ -96,19 +96,21 @@ Controls when the extension scans for TODO comments in your code:
 
 ### `my-todos.excludePatterns`
 
-Additional patterns to exclude from TODO scanning (comma-separated).
+Additional folder patterns to exclude from TODO scanning (comma-separated).
 
 **Default exclusions** (always applied):
 
 - `node_modules`, `dist`, `build`, `out`, `target`
 - `coverage`, `.git`
-- `__pycache__`, `*.pyc`, `*.pyo`, `*.egg-info`
+- `__pycache__`
 
 **Examples:**
 
 - `"temp,logs"` - excludes temp and logs folders
-- `"*.min.js,vendor/**"` - excludes minified JS files and vendor folder
-- `"test/**,spec/**"` - excludes test and spec folders
+- `"vendor,third-party"` - excludes vendor and third-party folders
+- `"test-folder,demo"` - excludes test-folder and demo folders
+
+**Note:** Currently supports folder name matching only. File extension patterns (like `*.js`) are not supported.
 
 **Access Settings:**
 

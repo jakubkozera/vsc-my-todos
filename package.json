@@ -99,8 +99,8 @@
         "my-todos.excludePatterns": {
           "type": "string",
           "default": "",
-          "description": "Additional patterns to exclude from TODO scanning (comma-separated)",
-          "markdownDescription": "Additional patterns to exclude from TODO scanning. Use comma to separate multiple patterns.\n\n**Default exclusions** (always applied):\n- node_modules\n- dist, build, out, target\n- coverage\n- .git\n- __pycache__, *.pyc, *.pyo, *.egg-info\n\n**Examples:**\n- `temp,logs` - excludes temp and logs folders\n- `*.min.js,vendor - excludes minified JS files and vendor folder\n- `test,spec - excludes test and spec folders"
+          "description": "Additional folder patterns to exclude from TODO scanning (comma-separated)",
+          "markdownDescription": "Additional folder patterns to exclude from TODO scanning. Use comma to separate multiple patterns.\n\n**Default exclusions** (always applied):\n- node_modules\n- dist, build, out, target\n- coverage\n- .git\n- __pycache__\n\n**Examples:**\n- `temp,logs` - excludes temp and logs folders\n- `vendor,third-party` - excludes vendor and third-party folders\n- `test-folder,demo` - excludes test-folder and demo folders\n\n**Note:** Currently supports folder name matching only. File extension patterns (like *.js) are not supported."
         }
       }
     }
