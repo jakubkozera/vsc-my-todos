@@ -45,7 +45,7 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
           this.navigateToCode(data.filePath, data.lineNumber);
           break;
         case "refreshCodeTodos":
-          this.scanCodeTodos();
+          this.refreshAll();
           break;
         case "openExternalLink":
           vscode.env.openExternal(vscode.Uri.parse(data.url));
@@ -288,6 +288,22 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
         type: "updateTodos",
         todos: this.todos,
       });
+    }
+  }
+
+  public async refreshAll(): Promise<void> {
+    try {
+      // First refresh the view with current todos
+      this.refreshView();
+      
+      // Then scan for code todos to ensure everything is up to date
+      await this.scanCodeTodos();
+      
+      // Refresh view again after scanning to show any new todos
+      this.refreshView();
+    } catch (error) {
+      console.error("Error in refreshAll:", error);
+      vscode.window.showWarningMessage("Failed to refresh all TODOs. Some items may not be up to date.");
     }
   }
 

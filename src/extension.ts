@@ -56,19 +56,13 @@ export function activate(context: vscode.ExtensionContext) {
     // Register commands
     context.subscriptions.push(
       vscode.commands.registerCommand("my-todos.refreshTodos", () => {
-        provider.refreshView();
+        provider.refreshAll();
       })
     );
 
     context.subscriptions.push(
       vscode.commands.registerCommand("my-todos.addTodo", () => {
         provider.addTodo();
-      })
-    );
-
-    context.subscriptions.push(
-      vscode.commands.registerCommand("my-todos.refreshCodeTodos", () => {
-        provider.scanCodeTodos();
       })
     );
 

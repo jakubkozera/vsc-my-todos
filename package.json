@@ -40,18 +40,13 @@
     "commands": [
       {
         "command": "my-todos.refreshTodos",
-        "title": "Refresh",
+        "title": "Refresh All TODOs",
         "icon": "$(refresh)"
       },
       {
         "command": "my-todos.addTodo",
         "title": "Add Todo",
         "icon": "$(add)"
-      },
-      {
-        "command": "my-todos.refreshCodeTodos",
-        "title": "Refresh Code TODOs",
-        "icon": "$(sync)"
       },
       {
         "command": "myTodos.showTodosView",
@@ -72,11 +67,6 @@
         },
         {
           "command": "my-todos.addTodo",
-          "when": "view == todoView",
-          "group": "navigation"
-        },
-        {
-          "command": "my-todos.refreshCodeTodos",
           "when": "view == todoView",
           "group": "navigation"
         },
