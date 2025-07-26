@@ -105,6 +105,12 @@
           "default": "activeScan",
           "description": "Controls when the extension scans for TODO comments in your code",
           "markdownDescription": "Controls when the extension scans for TODO comments in your code:\n\n- **Off**: Manual refresh only\n- **On Save**: Scan only when files are saved\n- **Active Scan**: Real-time scanning as you type\n\n💡 You can also access this setting by clicking the settings button in the My Todos view."
+        },
+        "my-todos.excludePatterns": {
+          "type": "string",
+          "default": "",
+          "description": "Additional patterns to exclude from TODO scanning (comma-separated)",
+          "markdownDescription": "Additional patterns to exclude from TODO scanning. Use comma to separate multiple patterns.\n\n**Default exclusions** (always applied):\n- node_modules\n- dist, build, out, target\n- coverage\n- .git\n- __pycache__, *.pyc, *.pyo, *.egg-info\n\n**Examples:**\n- `temp,logs` - excludes temp and logs folders\n- `*.min.js,vendor - excludes minified JS files and vendor folder\n- `test,spec - excludes test and spec folders"
         }
       }
     }

@@ -84,14 +84,36 @@ If you have any requirements or dependencies, add a section describing those and
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-- `myExtension.enable`: Enable/disable this extension.
-- `myExtension.thing`: Set to `blah` to do something.
+### `my-todos.scanMode`
+
+Controls when the extension scans for TODO comments in your code:
+
+- `"activeScan"` (default): Real-time scanning - detects TODOs as you type
+- `"onSave"`: Scan only when files are saved
+- `"off"`: Manual refresh only - no automatic TODO detection
+
+### `my-todos.excludePatterns`
+
+Additional patterns to exclude from TODO scanning (comma-separated).
+
+**Default exclusions** (always applied):
+
+- `node_modules`, `dist`, `build`, `out`, `target`
+- `coverage`, `.git`
+- `__pycache__`, `*.pyc`, `*.pyo`, `*.egg-info`
+
+**Examples:**
+
+- `"temp,logs"` - excludes temp and logs folders
+- `"*.min.js,vendor/**"` - excludes minified JS files and vendor folder
+- `"test/**,spec/**"` - excludes test and spec folders
+
+**Access Settings:**
+
+- Go to File → Preferences → Settings and search for "My Todos"
+- Or click the settings button (⚙️) in the My Todos view
 
 ## Known Issues
 
