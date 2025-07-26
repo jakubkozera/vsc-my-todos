@@ -19,9 +19,6 @@ window.addEventListener('message', event => {
 			todos = message.todos;
 			applyFilters();
 			break;
-		case 'setScanMode':
-			setScanMode(message.scanMode);
-			break;
 	}
 });
 
@@ -862,9 +859,6 @@ applyFilters();
 updateSortByButtonText();
 updateSortOrderButtonText();
 
-// Initialize settings with current scan mode
-initializeSettings();
-
 function navigateToCodeTodo(todoId) {
 	const todo = todos.find(t => t.id === todoId);
 	if (todo && todo.type === 'code' && todo.filePath && todo.lineNumber) {
@@ -877,40 +871,6 @@ function navigateToCodeTodo(todoId) {
 }
 
 // Settings functionality
-function toggleSettingsPopup() {
-	const popup = document.getElementById('settingsPopup');
-	popup.classList.toggle('active');
-}
-
-function initializeSettings() {
-	// Request current scan mode from extension
-	vscode.postMessage({
-		type: 'getScanMode'
-	});
-}
-
-function updateScanMode(mode) {
-	// Update the radio button selection
-	const radios = document.querySelectorAll('input[name="scanMode"]');
-	radios.forEach(radio => {
-		radio.checked = radio.value === mode;
-	});
-	
-	// Send the new setting to the extension
-	vscode.postMessage({
-		type: 'updateScanMode',
-		scanMode: mode
-	});
-}
-
-// Handle scan mode updates from extension
-function setScanMode(mode) {
-	const radios = document.querySelectorAll('input[name="scanMode"]');
-	radios.forEach(radio => {
-		radio.checked = radio.value === mode;
-	});
-}
-
 function openGitHubRepo() {
 	vscode.postMessage({
 		type: 'openExternalLink',

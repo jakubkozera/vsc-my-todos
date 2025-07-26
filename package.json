@@ -40,7 +40,7 @@
     "commands": [
       {
         "command": "my-todos.refreshTodos",
-        "title": "Refresh",
+        "title": "Refresh All TODOs",
         "icon": "$(refresh)"
       },
       {
@@ -49,13 +49,13 @@
         "icon": "$(add)"
       },
       {
-        "command": "my-todos.refreshCodeTodos",
-        "title": "Refresh Code TODOs",
-        "icon": "$(sync)"
-      },
-      {
         "command": "myTodos.showTodosView",
         "title": "Show Todos View"
+      },
+      {
+        "command": "my-todos.openSettings",
+        "title": "Open My Todos Settings",
+        "icon": "$(settings-gear)"
       }
     ],
     "menus": {
@@ -71,7 +71,7 @@
           "group": "navigation"
         },
         {
-          "command": "my-todos.refreshCodeTodos",
+          "command": "my-todos.openSettings",
           "when": "view == todoView",
           "group": "navigation"
         }
@@ -94,7 +94,13 @@
           ],
           "default": "activeScan",
           "description": "Controls when the extension scans for TODO comments in your code",
-          "markdownDescription": "Controls when the extension scans for TODO comments in your code:\n\n- **Off**: Manual refresh only\n- **On Save**: Scan only when files are saved\n- **Active Scan**: Real-time scanning as you type"
+          "markdownDescription": "Controls when the extension scans for TODO comments in your code:\n\n- **Off**: Manual refresh only\n- **On Save**: Scan only when files are saved\n- **Active Scan**: Real-time scanning as you type\n\n💡 You can also access this setting by clicking the settings button in the My Todos view."
+        },
+        "my-todos.excludePatterns": {
+          "type": "string",
+          "default": "",
+          "description": "Additional folder patterns to exclude from TODO scanning (comma-separated)",
+          "markdownDescription": "Additional folder patterns to exclude from TODO scanning. Use comma to separate multiple patterns.\n\n**Default exclusions** (always applied):\n- node_modules\n- dist, build, out, target\n- coverage\n- .git\n- __pycache__\n\n**Examples:**\n- `temp,logs` - excludes temp and logs folders\n- `vendor,third-party` - excludes vendor and third-party folders\n- `test-folder,demo` - excludes test-folder and demo folders\n\n**Note:** Currently supports folder name matching only. File extension patterns (like *.js) are not supported."
         }
       }
     }

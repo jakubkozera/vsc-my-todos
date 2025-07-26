@@ -56,7 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Register commands
     context.subscriptions.push(
       vscode.commands.registerCommand("my-todos.refreshTodos", () => {
-        provider.refreshView();
+        provider.refreshAll();
       })
     );
 
@@ -67,8 +67,8 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-      vscode.commands.registerCommand("my-todos.refreshCodeTodos", () => {
-        provider.scanCodeTodos();
+      vscode.commands.registerCommand("my-todos.openSettings", () => {
+        vscode.commands.executeCommand("workbench.action.openSettings", "my-todos");
       })
     );
 

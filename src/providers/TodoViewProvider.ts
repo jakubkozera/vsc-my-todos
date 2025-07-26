@@ -45,13 +45,7 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
           this.navigateToCode(data.filePath, data.lineNumber);
           break;
         case "refreshCodeTodos":
-          this.scanCodeTodos();
-          break;
-        case "getScanMode":
-          this.sendScanModeToWebview();
-          break;
-        case "updateScanMode":
-          this.updateScanMode(data.scanMode);
+          this.refreshAll();
           break;
         case "openExternalLink":
           vscode.env.openExternal(vscode.Uri.parse(data.url));
@@ -297,6 +291,22 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  public async refreshAll(): Promise<void> {
+    try {
+      // First refresh the view with current todos
+      this.refreshView();
+      
+      // Then scan for code todos to ensure everything is up to date
+      await this.scanCodeTodos();
+      
+      // Refresh view again after scanning to show any new todos
+      this.refreshView();
+    } catch (error) {
+      console.error("Error in refreshAll:", error);
+      vscode.window.showWarningMessage("Failed to refresh all TODOs. Some items may not be up to date.");
+    }
+  }
+
   private forceRefreshWebview() {
     // Force refresh webview regardless of visibility
     if (this._view) {
@@ -351,6 +361,10 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
           let files: vscode.Uri[] = [];
 
           try {
+            // Get exclude patterns from settings
+            const excludePatterns = this.getExcludePatterns();
+            const excludeGlob = `**/{${excludePatterns}}/**`;
+            
             // First attempt: try with RelativePattern
             files = await vscode.workspace.findFiles(
               new vscode.RelativePattern(
@@ -359,7 +373,7 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
               ),
               new vscode.RelativePattern(
                 workspaceFolder,
-                "{node_modules,dist,build,out,target,coverage,.git,__pycache__,*.pyc,*.pyo,*.egg-info}/**"
+                excludeGlob
               )
             );
           } catch (error) {
@@ -367,9 +381,12 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
           } // If no files found, try a simpler pattern
           if (files.length === 0) {
             try {
+              const excludePatterns = this.getExcludePatterns();
+              const excludeGlob = `{${excludePatterns}}/**`;
+              
               files = await vscode.workspace.findFiles(
                 "**/*.{ts,js,tsx,jsx,py,java,cs,cpp,c,php,rb,go,rs,swift,kt,vue,html,css,scss,less,json,md,yml,yaml,xml}",
-                "{node_modules,dist,build,out,target,coverage,.git,__pycache__,*.pyc,*.pyo,*.egg-info}/**"
+                excludeGlob
               );
             } catch (error) {
               // Fallback to basic pattern
@@ -378,46 +395,38 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
           if (files.length === 0) {
             try {
               files = await vscode.workspace.findFiles("**/*");
-              // Filter manually for code files
+              // Filter manually for code files and exclude patterns
               files = files.filter((file) => {
                 const path = file.fsPath.toLowerCase();
-                return (
-                  (path.endsWith(".ts") ||
-                    path.endsWith(".js") ||
-                    path.endsWith(".tsx") ||
-                    path.endsWith(".jsx") ||
-                    path.endsWith(".py") ||
-                    path.endsWith(".java") ||
-                    path.endsWith(".cs") ||
-                    path.endsWith(".cpp") ||
-                    path.endsWith(".c") ||
-                    path.endsWith(".php") ||
-                    path.endsWith(".rb") ||
-                    path.endsWith(".go") ||
-                    path.endsWith(".rs") ||
-                    path.endsWith(".swift") ||
-                    path.endsWith(".kt") ||
-                    path.endsWith(".vue") ||
-                    path.endsWith(".html") ||
-                    path.endsWith(".css") ||
-                    path.endsWith(".scss") ||
-                    path.endsWith(".less") ||
-                    path.endsWith(".json") ||
-                    path.endsWith(".md") ||
-                    path.endsWith(".yml") ||
-                    path.endsWith(".yaml") ||
-                    path.endsWith(".xml")) &&
-                  !path.includes("node_modules") &&
-                  !path.includes("dist") &&
-                  !path.includes("build") &&
-                  !path.includes("out") &&
-                  !path.includes("target") &&
-                  !path.includes("coverage") &&
-                  !path.includes(".git") &&
-                  !path.includes("__pycache__") &&
-                  !path.endsWith(".pyc") &&
-                  !path.endsWith(".pyo")
+                const isCodeFile = (
+                  path.endsWith(".ts") ||
+                  path.endsWith(".js") ||
+                  path.endsWith(".tsx") ||
+                  path.endsWith(".jsx") ||
+                  path.endsWith(".py") ||
+                  path.endsWith(".java") ||
+                  path.endsWith(".cs") ||
+                  path.endsWith(".cpp") ||
+                  path.endsWith(".c") ||
+                  path.endsWith(".php") ||
+                  path.endsWith(".rb") ||
+                  path.endsWith(".go") ||
+                  path.endsWith(".rs") ||
+                  path.endsWith(".swift") ||
+                  path.endsWith(".kt") ||
+                  path.endsWith(".vue") ||
+                  path.endsWith(".html") ||
+                  path.endsWith(".css") ||
+                  path.endsWith(".scss") ||
+                  path.endsWith(".less") ||
+                  path.endsWith(".json") ||
+                  path.endsWith(".md") ||
+                  path.endsWith(".yml") ||
+                  path.endsWith(".yaml") ||
+                  path.endsWith(".xml")
                 );
+                
+                return isCodeFile && !this.shouldExcludeFile(file.fsPath);
               });
             } catch (error) {
               // If all patterns fail, continue with empty file list
@@ -677,24 +686,45 @@ export class TodoViewProvider implements vscode.WebviewViewProvider {
     return config.get("scanMode", "activeScan");
   }
 
-  private async updateScanMode(scanMode: string): Promise<void> {
+  private getExcludePatterns(): string {
     const config = vscode.workspace.getConfiguration("my-todos");
-    await config.update(
-      "scanMode",
-      scanMode,
-      vscode.ConfigurationTarget.Global
-    );
-    // Send confirmation back to webview
-    this.sendScanModeToWebview();
+    const customPatterns = config.get("excludePatterns", "");
+    
+    // Default patterns that are always applied (folder names only)
+    const defaultPatterns = "node_modules,dist,build,out,target,coverage,.git,__pycache__";
+    
+    // Combine default patterns with custom patterns
+    if (customPatterns.trim()) {
+      return `${defaultPatterns},${customPatterns}`;
+    }
+    
+    return defaultPatterns;
   }
 
-  private sendScanModeToWebview(): void {
-    if (this._view) {
-      this._view.webview.postMessage({
-        type: "setScanMode",
-        scanMode: this.getScanMode(),
-      });
+  private shouldExcludeFile(filePath: string): boolean {
+    const excludePatterns = this.getExcludePatterns();
+    const patterns = excludePatterns.split(',').map(p => p.trim());
+    const path = filePath.toLowerCase();
+    
+    for (const pattern of patterns) {
+      if (pattern.includes('*')) {
+        // Handle glob patterns
+        const regexPattern = pattern
+          .replace(/\./g, '\\.')
+          .replace(/\*/g, '.*');
+        const regex = new RegExp(regexPattern, 'i');
+        if (regex.test(path)) {
+          return true;
+        }
+      } else {
+        // Simple string matching for folder/file names
+        if (path.includes(pattern.toLowerCase())) {
+          return true;
+        }
+      }
     }
+    
+    return false;
   }
   // Method to check if scanning should be performed based on current settings
   public shouldScan(trigger: "change" | "save"): boolean {
